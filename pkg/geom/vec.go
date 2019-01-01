@@ -12,11 +12,8 @@ type Vec struct {
 }
 
 // NewVec creates a Vec from 3 float values
-func NewVec(e0, e1, e2 float64) (v Vec) {
-	v.E[0] = e0
-	v.E[1] = e1
-	v.E[2] = e2
-	return
+func NewVec(e0, e1, e2 float64) Vec {
+	return Vec{E: [3]float64{e0, e1, e2}}
 }
 
 // X returns the first element
