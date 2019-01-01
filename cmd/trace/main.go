@@ -37,8 +37,20 @@ func main() {
 }
 
 func color(r geom.Ray) img.Color {
+	if hitSphere(geom.NewVec(0, 0, -1), 0.5, r) {
+		return img.NewColor(1, 0, 0)
+	}
 	t := 0.5 * (r.Dir.Y() + 1.0)
 	white := img.NewColor(1, 1, 1).Scaled(1 - t)
 	blue := img.NewColor(0.5, 0.7, 1).Scaled(t)
 	return white.Plus(blue)
+}
+
+func hitSphere(center geom.Vec, radius float64, r geom.Ray) bool {
+	oc := r.Or.Minus(center)
+	a := r.Dir.Dot(r.Dir.Vec)
+	b := 2 * oc.Dot(r.Dir.Vec)
+	c := oc.Dot(oc) - radius*radius
+	disc := b*b - 4*a*c
+	return disc > 0
 }
