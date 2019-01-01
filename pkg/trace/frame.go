@@ -9,6 +9,8 @@ import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
+const bias = 0.001
+
 // Hitter represents something that can be Hit by a Ray.
 type Hitter interface {
 	Hit(r geom.Ray, tMin, tMax float64) (t float64, p geom.Vec, n geom.Unit)
@@ -47,7 +49,7 @@ func (f Frame) WritePPM(w io.Writer, h Hitter, samples int) error {
 				r := cam.Ray(u, v)
 				c = c.Plus(color(r, h))
 			}
-			c = c.Scaled(1 / float64(samples))
+			c = c.Scaled(1 / float64(samples)).Gamma(2)
 			ir := int(255.99 * c.R())
 			ig := int(255.99 * c.G())
 			ib := int(255.99 * c.B())
@@ -60,8 +62,10 @@ func (f Frame) WritePPM(w io.Writer, h Hitter, samples int) error {
 }
 
 func color(r geom.Ray, h Hitter) Color {
-	if t, _, n := h.Hit(r, 0, math.MaxFloat64); t > 0 {
-		return NewColor(n.X()+1, n.Y()+1, n.Z()+1).Scaled(0.5)
+	if t, p, n := h.Hit(r, bias, math.MaxFloat64); t > 0 {
+		target := p.Plus(n.Vec).Plus(geom.RandVecInSphere())
+		r2 := geom.NewRay(p, target.Minus(p).ToUnit())
+		return color(r2, h).Scaled(0.5)
 	}
 	t := 0.5 * (r.Dir.Y() + 1.0)
 	white := NewColor(1, 1, 1).Scaled(1 - t)

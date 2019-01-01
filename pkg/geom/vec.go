@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/rand"
 )
 
 // Vec represents a 3-element vector
@@ -14,6 +15,17 @@ type Vec struct {
 // NewVec creates a Vec from 3 float values
 func NewVec(e0, e1, e2 float64) Vec {
 	return Vec{E: [3]float64{e0, e1, e2}}
+}
+
+// RandVecInSphere creates a random Vec within a unit sphere
+// TODO: I don't like rejection methods. Isn't there a way to generate 2 angles and accomplish the same thing reliably?
+func RandVecInSphere() Vec {
+	for {
+		v := NewVec(rand.Float64(), rand.Float64(), rand.Float64()).Scaled(2).Minus(NewVec(1, 1, 1))
+		if v.LenSq() < 1 {
+			return v
+		}
+	}
 }
 
 // X returns the first element

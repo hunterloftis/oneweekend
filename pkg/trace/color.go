@@ -1,6 +1,10 @@
 package trace
 
-import "github.com/hunterloftis/oneweekend/pkg/geom"
+import (
+	"math"
+
+	"github.com/hunterloftis/oneweekend/pkg/geom"
+)
 
 // Color represents an RGB color value
 type Color struct {
@@ -38,4 +42,14 @@ func (c Color) Plus(c2 Color) Color {
 // Scaled returns the color scaled
 func (c Color) Scaled(n float64) Color {
 	return Color{Vec: c.Vec.Scaled(n)}
+}
+
+// Gamma raises each of R, G, and B to 1/n
+func (c Color) Gamma(n float64) Color {
+	ni := 1 / n
+	return NewColor(
+		math.Pow(c.R(), ni),
+		math.Pow(c.G(), ni),
+		math.Pow(c.B(), ni),
+	)
 }
