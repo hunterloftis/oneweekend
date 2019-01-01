@@ -8,8 +8,8 @@ import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
-// Surface represents something that can be Hit by a Ray.
-type Surface interface {
+// Hitter represents something that can be Hit by a Ray.
+type Hitter interface {
 	Hit(r geom.Ray, tMin, tMax float64) (t float64, p geom.Vec, n geom.Unit)
 }
 
@@ -24,7 +24,7 @@ func NewFrame(width, height int) Frame {
 }
 
 // WritePPM traces each pixel in the frame and writes the results to w in PPM format
-func (f Frame) WritePPM(w io.Writer, s Surface) error {
+func (f Frame) WritePPM(w io.Writer, h Hitter) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (f Frame) WritePPM(w io.Writer, s Surface) error {
 				origin,
 				lowerLeft.Plus((horizontal.Scaled(u)).Plus(vertical.Scaled(v))).ToUnit(),
 			)
-			col := color(r, s)
+			col := color(r, h)
 			ir := int(255.99 * col.R())
 			ig := int(255.99 * col.G())
 			ib := int(255.99 * col.B())
@@ -60,8 +60,8 @@ func (f Frame) WritePPM(w io.Writer, s Surface) error {
 	return nil
 }
 
-func color(r geom.Ray, s Surface) Color {
-	if t, _, n := s.Hit(r, 0, math.MaxFloat64); t > 0 {
+func color(r geom.Ray, h Hitter) Color {
+	if t, _, n := h.Hit(r, 0, math.MaxFloat64); t > 0 {
 		return NewColor(n.X()+1, n.Y()+1, n.Z()+1).Scaled(0.5)
 	}
 	t := 0.5 * (r.Dir.Y() + 1.0)
