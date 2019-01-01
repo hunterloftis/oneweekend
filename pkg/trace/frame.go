@@ -10,7 +10,7 @@ import (
 
 // Surface represents something that can be Hit by a Ray.
 type Surface interface {
-	Hit(r geom.Ray, tMin, tMax float64) (t, p geom.Vec, n geom.Unit)
+	Hit(r geom.Ray, tMin, tMax float64) (t float64, p geom.Vec, n geom.Unit)
 }
 
 // Frame gathers the results of ray traces on a W x H grid.
@@ -48,7 +48,7 @@ func (f Frame) WritePPM(w io.Writer, s Surface) error {
 				origin,
 				lowerLeft.Plus((horizontal.Scaled(u)).Plus(vertical.Scaled(v))).ToUnit(),
 			)
-			col := color(r)
+			col := color(r, s)
 			ir := int(255.99 * col.R())
 			ig := int(255.99 * col.G())
 			ib := int(255.99 * col.B())
@@ -60,25 +60,12 @@ func (f Frame) WritePPM(w io.Writer, s Surface) error {
 	return nil
 }
 
-func color(r geom.Ray) Color {
-	if t, ok := hitSphere(geom.NewVec(0, 0, -1), 0.5, r); ok {
-		n := r.At(t).Minus(geom.NewVec(0, 0, -1)).ToUnit()
+func color(r geom.Ray, s Surface) Color {
+	if t, _, n := s.Hit(r, 0, math.MaxFloat64); t > 0 {
 		return NewColor(n.X()+1, n.Y()+1, n.Z()+1).Scaled(0.5)
 	}
 	t := 0.5 * (r.Dir.Y() + 1.0)
 	white := NewColor(1, 1, 1).Scaled(1 - t)
 	blue := NewColor(0.5, 0.7, 1).Scaled(t)
 	return white.Plus(blue)
-}
-
-func hitSphere(center geom.Vec, radius float64, r geom.Ray) (t float64, ok bool) {
-	oc := r.Or.Minus(center)
-	a := r.Dir.Dot(r.Dir.Vec)
-	b := 2 * oc.Dot(r.Dir.Vec)
-	c := oc.Dot(oc) - radius*radius
-	disc := b*b - 4*a*c
-	if disc < 0 {
-		return 0, false
-	}
-	return (-b - math.Sqrt(disc)) / (2 * a), true
 }
