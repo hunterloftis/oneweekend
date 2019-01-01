@@ -1,4 +1,4 @@
-package img
+package trace
 
 import "github.com/hunterloftis/oneweekend/pkg/geom"
 
