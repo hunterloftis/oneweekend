@@ -13,7 +13,17 @@ const bias = 0.001
 
 // Hitter represents something that can be Hit by a Ray.
 type Hitter interface {
-	Hit(r geom.Ray, tMin, tMax float64) (t float64, p geom.Vec, n geom.Unit)
+	Hit(r geom.Ray, tMin, tMax float64) (t float64, s Surfacer)
+}
+
+// Surfacer represents something that can return surface normals and materials
+type Surfacer interface {
+	Surface(p geom.Vec) (n geom.Unit, m Material)
+}
+
+// Material represents a material that scatters light.
+type Material interface {
+	Scatter(in geom.Ray, p geom.Vec, n geom.Unit) (out geom.Ray, attenuation Color)
 }
 
 // Frame gathers the results of ray traces on a W x H grid.
@@ -47,7 +57,7 @@ func (f Frame) WritePPM(w io.Writer, h Hitter, samples int) error {
 				u := (float64(x) + rand.Float64()) / float64(f.W)
 				v := (float64(y) + rand.Float64()) / float64(f.H)
 				r := cam.Ray(u, v)
-				c = c.Plus(color(r, h))
+				c = c.Plus(color(r, h, 0))
 			}
 			c = c.Scaled(1 / float64(samples)).Gamma(2)
 			ir := int(255.99 * c.R())
@@ -61,11 +71,18 @@ func (f Frame) WritePPM(w io.Writer, h Hitter, samples int) error {
 	return nil
 }
 
-func color(r geom.Ray, h Hitter) Color {
-	if t, p, n := h.Hit(r, bias, math.MaxFloat64); t > 0 {
-		target := p.Plus(n.Vec).Plus(geom.RandVecInSphere())
-		r2 := geom.NewRay(p, target.Minus(p).ToUnit())
-		return color(r2, h).Scaled(0.5)
+func color(r geom.Ray, h Hitter, depth int) Color {
+	if depth > 50 {
+		return NewColor(0, 0, 0)
+	}
+	if t, s := h.Hit(r, bias, math.MaxFloat64); t > 0 {
+		p := r.At(t)
+		n, m := s.Surface(p)
+		r2, attenuation := m.Scatter(r, p, n)
+		if attenuation.Zero() {
+			return attenuation
+		}
+		return color(r2, h, depth+1).Times(attenuation)
 	}
 	t := 0.5 * (r.Dir.Y() + 1.0)
 	white := NewColor(1, 1, 1).Scaled(1 - t)

@@ -8,9 +8,11 @@ import (
 )
 
 func main() {
+	red := trace.Lambert{Albedo: trace.NewColor(0.8, 0.3, 0.3)}
+	yellow := trace.Lambert{Albedo: trace.NewColor(0.8, 0.8, 0.0)}
 	l := trace.NewList(
-		trace.NewSphere(geom.NewVec(0, 0, -1), 0.5),
-		trace.NewSphere(geom.NewVec(0, -100.5, -1), 100),
+		trace.NewSphere(geom.NewVec(0, 0, -1), 0.5, red),
+		trace.NewSphere(geom.NewVec(0, -100.5, -1), 100, yellow),
 	)
 	f := trace.NewFrame(200, 100)
 	if err := f.WritePPM(os.Stdout, l, 100); err != nil {

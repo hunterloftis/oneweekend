@@ -14,13 +14,12 @@ func NewList(s ...Hitter) List {
 
 // Hit finds the first intersection (if any) between Ray r and any of the Hitters in the List.
 // If no intersection is found, t = 0.
-func (l List) Hit(r geom.Ray, tMin, tMax float64) (t float64, p geom.Vec, n geom.Unit) {
+func (l List) Hit(r geom.Ray, tMin, tMax float64) (t float64, s Surfacer) {
 	closest := tMax
 	for _, h := range l.HH {
-		if ht, hp, hn := h.Hit(r, tMin, closest); ht > 0 {
+		if ht, hs := h.Hit(r, tMin, closest); ht > 0 {
 			closest, t = ht, ht
-			p = hp
-			n = hn
+			s = hs
 		}
 	}
 	return

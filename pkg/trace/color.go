@@ -39,6 +39,11 @@ func (c Color) Plus(c2 Color) Color {
 	return Color{Vec: c.Vec.Plus(c2.Vec)}
 }
 
+// Times returns the product of two colors
+func (c Color) Times(c2 Color) Color {
+	return Color{Vec: c.Vec.Times(c2.Vec)}
+}
+
 // Scaled returns the color scaled
 func (c Color) Scaled(n float64) Color {
 	return Color{Vec: c.Vec.Scaled(n)}
