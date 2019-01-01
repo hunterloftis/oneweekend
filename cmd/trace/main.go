@@ -13,7 +13,7 @@ func main() {
 		trace.NewSphere(geom.NewVec(0, -100.5, -1), 100),
 	)
 	f := trace.NewFrame(200, 100)
-	if err := f.WritePPM(os.Stdout, l); err != nil {
+	if err := f.WritePPM(os.Stdout, l, 100); err != nil {
 		panic(err)
 	}
 }
