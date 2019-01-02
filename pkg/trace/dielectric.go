@@ -2,6 +2,7 @@ package trace
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
@@ -18,20 +19,25 @@ func NewDielectric(refractiveIndex float64) Dielectric {
 
 // Scatter reflects or refracts incoming light based on the ratio of indexes of refraction
 func (d Dielectric) Scatter(in geom.Unit, n geom.Unit) (out geom.Unit, attenuation Color, ok bool) {
-	attenuation = NewColor(1, 1, 1)
+	var outNormal geom.Unit
+	var ratio float64
+	var cos float64
 
-	outNormal := n
-	ratio := 1 / d.RefIdx
 	if in.Dot(n) > 0 {
 		outNormal = n.Inv()
 		ratio = d.RefIdx
+		cos = d.RefIdx * in.Dot(n) / in.Len()
+	} else {
+		outNormal = n
+		ratio = 1 / d.RefIdx
+		cos = -in.Dot(n) / in.Len()
 	}
 
 	out, refracted := refract(in, outNormal, ratio)
-	if !refracted {
+	if !refracted || schlick(cos, d.RefIdx) > rand.Float64() {
 		out = reflect(in, n)
 	}
-	return out, attenuation, true
+	return out, NewColor(1, 1, 1), true
 }
 
 func refract(u, n geom.Unit, ratio float64) (u2 geom.Unit, ok bool) {
@@ -43,4 +49,10 @@ func refract(u, n geom.Unit, ratio float64) (u2 geom.Unit, ok bool) {
 	// TODO: compose this so it's more readable
 	u2 = (u.Minus(n.Scaled(dt)).Scaled(ratio)).Minus(n.Scaled(math.Sqrt(disc))).ToUnit()
 	return u2, true
+}
+
+func schlick(cos, refIdx float64) float64 {
+	r0 := (1 - refIdx) / (1 + refIdx)
+	r0 = r0 * r0
+	return r0 + (1-r0)*math.Pow((1-cos), 5)
 }
