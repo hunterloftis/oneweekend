@@ -22,7 +22,7 @@ func NewSphere(center geom.Vec, radius float64, m Material) Sphere {
 // If no intersection is found, t = 0.
 func (s Sphere) Hit(r geom.Ray, tMin, tMax float64) (t float64, surf Surfacer) {
 	oc := r.Or.Minus(s.Center)
-	a := r.Dir.Dot(r.Dir.Vec)
+	a := r.Dir.Dot(r.Dir)
 	b := oc.Dot(r.Dir.Vec)
 	c := oc.Dot(oc) - s.Rad*s.Rad
 	disc := b*b - a*c

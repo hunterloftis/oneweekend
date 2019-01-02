@@ -117,8 +117,3 @@ func (v Vec) Cross(v2 Vec) Vec {
 		v.E[0]*v2.E[1]-v.E[1]*v2.E[0],
 	)
 }
-
-// Zero returns whether or not this is a zero vector
-func (v Vec) Zero() bool {
-	return v.E[0] == 0 && v.E[1] == 0 && v.E[2] == 0
-}
