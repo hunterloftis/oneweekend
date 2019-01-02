@@ -23,7 +23,7 @@ type Surfacer interface {
 
 // Material represents a material that scatters light.
 type Material interface {
-	Scatter(in geom.Ray, p geom.Vec, n geom.Unit) (out geom.Ray, attenuation Color, ok bool)
+	Scatter(in geom.Unit, n geom.Unit) (out geom.Unit, attenuation Color, ok bool)
 }
 
 // Frame gathers the results of ray traces on a W x H grid.
@@ -78,10 +78,11 @@ func color(r geom.Ray, h Hitter, depth int) Color {
 	if t, s := h.Hit(r, bias, math.MaxFloat64); t > 0 {
 		p := r.At(t)
 		n, m := s.Surface(p)
-		r2, attenuation, ok := m.Scatter(r, p, n)
+		scattered, attenuation, ok := m.Scatter(r.Dir, n)
 		if !ok {
 			return NewColor(0, 0, 0)
 		}
+		r2 := geom.NewRay(p, scattered)
 		return color(r2, h, depth+1).Times(attenuation)
 	}
 	t := 0.5 * (r.Dir.Y() + 1.0)

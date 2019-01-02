@@ -17,21 +17,21 @@ func NewDielectric(refractiveIndex float64) Dielectric {
 }
 
 // Scatter reflects or refracts incoming light based on the ratio of indexes of refraction
-func (d Dielectric) Scatter(in geom.Ray, p geom.Vec, n geom.Unit) (out geom.Ray, attenuation Color, ok bool) {
+func (d Dielectric) Scatter(in geom.Unit, n geom.Unit) (out geom.Unit, attenuation Color, ok bool) {
 	attenuation = NewColor(1, 1, 1)
 
 	outNormal := n
 	ratio := 1 / d.RefIdx
-	if in.Dir.Dot(n) > 0 {
+	if in.Dot(n) > 0 {
 		outNormal = n.Inv()
 		ratio = d.RefIdx
 	}
 
-	r, refracted := refract(in.Dir, outNormal, ratio)
+	out, refracted := refract(in, outNormal, ratio)
 	if !refracted {
-		r = reflect(in.Dir, n)
+		out = reflect(in, n)
 	}
-	return geom.NewRay(p, r), attenuation, true
+	return out, attenuation, true
 }
 
 func refract(u, n geom.Unit, ratio float64) (u2 geom.Unit, ok bool) {
