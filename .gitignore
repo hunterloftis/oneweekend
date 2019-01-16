@@ -1,1 +1,3 @@
 *.ppm
+/trace
+/trace.exe
