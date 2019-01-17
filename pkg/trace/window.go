@@ -13,12 +13,12 @@ const bias = 0.001
 
 // Hitter represents something that can be Hit by a Ray.
 type Hitter interface {
-	Hit(r geom.Ray, tMin, tMax float64) (t float64, s Surfacer)
+	Hit(r geom.Ray, tMin, tMax float64) (t float64, s Bouncer)
 }
 
-// Surfacer represents something that can return surface normals and materials
-type Surfacer interface {
-	Surface(p geom.Vec) (n geom.Unit, m Material)
+// Bouncer represents something that can return Bounce normals and materials
+type Bouncer interface {
+	Bounce(p geom.Vec) (n geom.Unit, m Material)
 }
 
 // Material represents a material that scatters light.
@@ -75,9 +75,9 @@ func color(r geom.Ray, h Hitter, depth int) Color {
 	if depth > 50 {
 		return NewColor(0, 0, 0)
 	}
-	if t, s := h.Hit(r, bias, math.MaxFloat64); t > 0 {
+	if t, b := h.Hit(r, bias, math.MaxFloat64); t > 0 {
 		p := r.At(t)
-		n, m := s.Surface(p)
+		n, m := b.Bounce(p)
 		scattered, attenuation, ok := m.Scatter(r.Dir, n)
 		if !ok {
 			return NewColor(0, 0, 0)
