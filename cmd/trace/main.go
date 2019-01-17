@@ -19,8 +19,8 @@ func main() {
 		trace.NewSphere(geom.NewVec(-1, 0, -1), 0.5, glass),
 		trace.NewSphere(geom.NewVec(-1, 0, -1), -0.45, glass),
 	)
-	f := trace.NewFrame(400, 200)
-	if err := f.WritePPM(os.Stdout, l, 100); err != nil {
+	w := trace.NewWindow(400, 200)
+	if err := w.WritePPM(os.Stdout, l, 100); err != nil {
 		panic(err)
 	}
 }

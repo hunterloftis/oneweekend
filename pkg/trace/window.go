@@ -26,22 +26,22 @@ type Material interface {
 	Scatter(in geom.Unit, n geom.Unit) (out geom.Unit, attenuation Color, ok bool)
 }
 
-// Frame gathers the results of ray traces on a W x H grid.
-type Frame struct {
+// Window gathers the results of ray traces on a W x H grid.
+type Window struct {
 	W, H int
 }
 
-// NewFrame creates a new frame with specific dimensions
-func NewFrame(width, height int) Frame {
-	return Frame{W: width, H: height}
+// NewWindow creates a new Window with specific dimensions
+func NewWindow(width, height int) Window {
+	return Window{W: width, H: height}
 }
 
-// WritePPM traces each pixel in the frame and writes the results to w in PPM format
-func (f Frame) WritePPM(w io.Writer, h Hitter, samples int) error {
+// WritePPM traces each pixel in the Window and writes the results to w in PPM format
+func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
-	if _, err := fmt.Fprintln(w, f.W, f.H); err != nil {
+	if _, err := fmt.Fprintln(w, wi.W, wi.H); err != nil {
 		return err
 	}
 	if _, err := fmt.Fprintln(w, "255"); err != nil {
@@ -50,12 +50,12 @@ func (f Frame) WritePPM(w io.Writer, h Hitter, samples int) error {
 
 	cam := Camera{}
 
-	for y := f.H - 1; y >= 0; y-- {
-		for x := 0; x < f.W; x++ {
+	for y := wi.H - 1; y >= 0; y-- {
+		for x := 0; x < wi.W; x++ {
 			c := NewColor(0, 0, 0)
 			for s := 0; s < samples; s++ {
-				u := (float64(x) + rand.Float64()) / float64(f.W)
-				v := (float64(y) + rand.Float64()) / float64(f.H)
+				u := (float64(x) + rand.Float64()) / float64(wi.W)
+				v := (float64(y) + rand.Float64()) / float64(wi.H)
 				r := cam.Ray(u, v)
 				c = c.Plus(color(r, h, 0))
 			}
