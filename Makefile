@@ -16,9 +16,8 @@ profile:
 	@echo 'Next, go tool pprof --pdf ./trace /tmp/path/to/cpu.pprof > cpu.pdf'
 
 profwin:
-	go build ./cmd/trace
-	./trace.exe -profile > test.ppm
 	PATH %PATH%;C:\Program Files (x86)\Graphviz2.38\bin
+	go build ./cmd/trace
+	trace.exe -profile > test.ppm
 	go tool pprof --pdf ./trace.exe C:\path\to\cpu.pprof > cpu.pdf
 	start cpu.pdf
-	

@@ -75,7 +75,7 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 }
 
 func color(r geom.Ray, h Hitter, depth int) Color {
-	if depth > 50 {
+	if depth > 9 {
 		return NewColor(0, 0, 0)
 	}
 	if t, b := h.Hit(r, bias, math.MaxFloat64); t > 0 {

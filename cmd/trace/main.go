@@ -21,7 +21,7 @@ func main() {
 	}
 }
 
-func scene() trace.List {
+func scene() *trace.List {
 	gray := trace.NewLambert(trace.NewColor(0.5, 0.5, 0.5))
 	l := trace.NewList(
 		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, gray),
@@ -35,7 +35,7 @@ func scene() trace.List {
 			if center.Minus(geom.NewVec(4, 0.2, 0)).Len() <= 0.9 {
 				continue
 			}
-			l = l.Plus(trace.NewSphere(center, 0.2, mat()))
+			l.Add(trace.NewSphere(center, 0.2, mat()))
 		}
 	}
 	return l
