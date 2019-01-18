@@ -13,17 +13,12 @@ const bias = 0.001
 
 // Hitter represents something that can be Hit by a Ray.
 type Hitter interface {
-	Hit(r geom.Ray, tMin, tMax float64) (t float64, s Bouncer)
+	Hit(r Ray, tMin, tMax float64) (t float64, s Bouncer)
 }
 
-// Bouncer represents something that can return Bounce normals and materials
+// Bouncer represents something that can return Bounce rays out in a direction with attenuation
 type Bouncer interface {
-	Bounce(p geom.Vec) (n geom.Unit, m Material)
-}
-
-// Material represents a material that scatters light.
-type Material interface {
-	Scatter(in geom.Unit, n geom.Unit) (out geom.Unit, attenuation Color, ok bool)
+	Bounce(in Ray, dist float64) (out Ray, attenuation Color, ok bool)
 }
 
 // Window gathers the results of ray traces on a W x H grid.
@@ -51,7 +46,7 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 	from := geom.NewVec(13, 2, 3)
 	at := geom.NewVec(0, 0, 0)
 	focus := 10.0
-	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 20, float64(wi.W)/float64(wi.H), 0.1, focus)
+	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 20, float64(wi.W)/float64(wi.H), 0, focus, 0, 1)
 
 	for y := wi.H - 1; y >= 0; y-- {
 		for x := 0; x < wi.W; x++ {
@@ -74,18 +69,15 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 	return nil
 }
 
-func color(r geom.Ray, h Hitter, depth int) Color {
+func color(r Ray, h Hitter, depth int) Color {
 	if depth > 9 {
 		return NewColor(0, 0, 0)
 	}
-	if t, b := h.Hit(r, bias, math.MaxFloat64); t > 0 {
-		p := r.At(t)
-		n, m := b.Bounce(p)
-		scattered, attenuation, ok := m.Scatter(r.Dir, n)
+	if d, b := h.Hit(r, bias, math.MaxFloat64); d > 0 {
+		r2, attenuation, ok := b.Bounce(r, d)
 		if !ok {
 			return NewColor(0, 0, 0)
 		}
-		r2 := geom.NewRay(p, scattered)
 		return color(r2, h, depth+1).Times(attenuation)
 	}
 	t := 0.5 * (r.Dir.Y() + 1.0)

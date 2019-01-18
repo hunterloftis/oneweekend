@@ -15,7 +15,7 @@ func main() {
 	if flag.Parse(); *p {
 		defer profile.Start().Stop()
 	}
-	w := trace.NewWindow(1200, 800)
+	w := trace.NewWindow(480, 320)
 	if err := w.WritePPM(os.Stdout, scene(), 100); err != nil {
 		panic(err)
 	}
@@ -35,21 +35,26 @@ func scene() *trace.List {
 			if center.Minus(geom.NewVec(4, 0.2, 0)).Len() <= 0.9 {
 				continue
 			}
-			l.Add(trace.NewSphere(center, 0.2, mat()))
+			m, move := mat()
+			if move {
+				l.Add(trace.NewMovingSphere(center, center.Plus(geom.NewVec(0, 0.5*rand.Float64(), 0)), 0, 1, 0.2, m))
+			} else {
+				l.Add(trace.NewSphere(center, 0.2, m))
+			}
 		}
 	}
 	return l
 }
 
-func mat() trace.Material {
+func mat() (trace.Material, bool) {
 	m := rand.Float64()
 	if m < 0.8 {
 		c := trace.NewColor(rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64())
-		return trace.NewLambert(c)
+		return trace.NewLambert(c), true
 	}
 	if m < 0.95 {
 		c := trace.NewColor(0.5*(1+rand.Float64()), 0.5*(1+rand.Float64()), 0.5*(1+rand.Float64()))
-		return trace.NewMetal(c, 0.5*rand.Float64())
+		return trace.NewMetal(c, 0.5*rand.Float64()), false
 	}
-	return trace.NewDielectric(1.5)
+	return trace.NewDielectric(1.5), false
 }
