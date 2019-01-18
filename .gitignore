@@ -1,3 +1,4 @@
 *.ppm
 /trace
 /trace.exe
+/assets

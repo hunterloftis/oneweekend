@@ -48,7 +48,7 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 		return err
 	}
 
-	cam := Camera{}
+	cam := NewCamera(90, float64(wi.W)/float64(wi.H))
 
 	for y := wi.H - 1; y >= 0; y-- {
 		for x := 0; x < wi.W; x++ {
