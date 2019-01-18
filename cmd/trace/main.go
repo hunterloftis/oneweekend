@@ -1,15 +1,21 @@
 package main
 
 import (
+	"flag"
 	"math/rand"
 	"os"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 	"github.com/hunterloftis/oneweekend/pkg/trace"
+	"github.com/pkg/profile"
 )
 
 func main() {
-	w := trace.NewWindow(1200, 800)
+	p := flag.Bool("profile", false, "generate a cpu profile")
+	if flag.Parse(); *p {
+		defer profile.Start().Stop()
+	}
+	w := trace.NewWindow(120, 80)
 	if err := w.WritePPM(os.Stdout, scene(), 100); err != nil {
 		panic(err)
 	}

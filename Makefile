@@ -10,3 +10,15 @@ doc:
 	echo -e "open http://localhost:6060/pkg/github.com/hunterloftis/oneweekend\n"
 	GOROOT=/tmp/goroot/ GOPATH=/tmp/gopath/ godoc -http=localhost:6060
 	
+profile:
+	go build ./cmd/trace
+	./trace -profile > test.ppm
+	@echo 'Next, go tool pprof --pdf ./trace /tmp/path/to/cpu.pprof > cpu.pdf'
+
+profwin:
+	go build ./cmd/trace
+	./trace.exe -profile > test.ppm
+	PATH %PATH%;C:\Program Files (x86)\Graphviz2.38\bin
+	go tool pprof --pdf ./trace.exe C:\path\to\cpu.pprof > cpu.pdf
+	start cpu.pdf
+	
