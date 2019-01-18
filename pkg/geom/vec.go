@@ -58,8 +58,8 @@ func (v Vec) LenSq() float64 {
 	return v.E[0]*v.E[0] + v.E[1]*v.E[1] + v.E[2]*v.E[2]
 }
 
-// ToUnit converts this vector to a unit vector
-func (v Vec) ToUnit() (u Unit) {
+// Unit converts this vector to a unit vector
+func (v Vec) Unit() (u Unit) {
 	k := 1.0 / v.Len()
 	u.E[0] = v.E[0] * k
 	u.E[1] = v.E[1] * k

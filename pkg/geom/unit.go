@@ -5,6 +5,12 @@ type Unit struct {
 	Vec
 }
 
+// NewUnit returns a new unit vector with the given x, y, z values
+// (it does not check that the vector's magnitude is 1)
+func NewUnit(x, y, z float64) Unit {
+	return Unit{Vec: NewVec(x, y, z)}
+}
+
 // Dot returns the dot product of two unit vectors.
 // Values above zero indicate vectors pointing in the same hemisphere.
 // Values below zero indicate vectors pointing towards opposite hemispheres.

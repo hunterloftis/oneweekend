@@ -43,5 +43,5 @@ func (s Sphere) Hit(r geom.Ray, tMin, tMax float64) (t float64, bo Bouncer) {
 
 // Bounce returns the normal and material at point p on the Sphere
 func (s Sphere) Bounce(p geom.Vec) (n geom.Unit, m Material) {
-	return p.Minus(s.Center).Scaled(s.Rad).ToUnit(), s.Mat
+	return p.Minus(s.Center).Scaled(s.Rad).Unit(), s.Mat
 }

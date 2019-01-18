@@ -47,7 +47,7 @@ func refract(u, n geom.Unit, ratio float64) (u2 geom.Unit, ok bool) {
 		return u2, false
 	}
 	// TODO: compose this so it's more readable
-	u2 = (u.Minus(n.Scaled(dt)).Scaled(ratio)).Minus(n.Scaled(math.Sqrt(disc))).ToUnit()
+	u2 = (u.Minus(n.Scaled(dt)).Scaled(ratio)).Minus(n.Scaled(math.Sqrt(disc))).Unit()
 	return u2, true
 }
 

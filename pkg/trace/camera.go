@@ -14,14 +14,19 @@ type Camera struct {
 	origin     geom.Vec
 }
 
-func NewCamera(vfov, aspect float64) (c Camera) {
+func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect float64) (c Camera) {
 	theta := vfov * math.Pi / 180
 	halfH := math.Tan(theta / 2)
 	halfW := aspect * halfH
-	c.lowerLeft = geom.NewVec(-halfW, -halfH, -1)
-	c.horizontal = geom.NewVec(2*halfW, 0, 0)
-	c.vertical = geom.NewVec(0, 2*halfH, 0)
-	c.origin = geom.NewVec(0, 0, 0)
+
+	w := lookFrom.Minus(lookAt).Unit()
+	u := vup.Cross(w.Vec).Unit()
+	v := w.Cross(u.Vec).Unit()
+
+	c.origin = lookFrom
+	c.lowerLeft = c.origin.Minus(u.Scaled(halfW)).Minus(v.Scaled(halfH)).Minus(w.Vec)
+	c.horizontal = u.Scaled(2 * halfW)
+	c.vertical = v.Scaled(2 * halfH)
 	return
 }
 
@@ -29,6 +34,6 @@ func NewCamera(vfov, aspect float64) (c Camera) {
 func (c Camera) Ray(u, v float64) geom.Ray {
 	return geom.NewRay(
 		c.origin,
-		c.lowerLeft.Plus((c.horizontal.Scaled(u)).Plus(c.vertical.Scaled(v))).ToUnit(),
+		c.lowerLeft.Plus((c.horizontal.Scaled(u)).Plus(c.vertical.Scaled(v))).Minus(c.origin).Unit(),
 	)
 }
