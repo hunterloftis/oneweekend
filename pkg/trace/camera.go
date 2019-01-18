@@ -12,28 +12,39 @@ type Camera struct {
 	horizontal geom.Vec
 	vertical   geom.Vec
 	origin     geom.Vec
+	u, v, w    geom.Unit
+	lensRadius float64
 }
 
-func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect float64) (c Camera) {
+func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture, focus float64) (c Camera) {
 	theta := vfov * math.Pi / 180
 	halfH := math.Tan(theta / 2)
 	halfW := aspect * halfH
 
-	w := lookFrom.Minus(lookAt).Unit()
-	u := vup.Cross(w.Vec).Unit()
-	v := w.Cross(u.Vec).Unit()
+	c.w = lookFrom.Minus(lookAt).Unit()
+	c.u = vup.Cross(c.w.Vec).Unit()
+	c.v = c.w.Cross(c.u.Vec).Unit()
 
+	width := c.u.Scaled(halfW * focus)
+	height := c.v.Scaled(halfH * focus)
+	dist := c.w.Scaled(focus)
+
+	c.lensRadius = aperture / 2
 	c.origin = lookFrom
-	c.lowerLeft = c.origin.Minus(u.Scaled(halfW)).Minus(v.Scaled(halfH)).Minus(w.Vec)
-	c.horizontal = u.Scaled(2 * halfW)
-	c.vertical = v.Scaled(2 * halfH)
+	c.lowerLeft = c.origin.Minus(width).Minus(height).Minus(dist)
+	c.horizontal = width.Scaled(2)
+	c.vertical = height.Scaled(2)
 	return
 }
 
-// Ray returns a Ray passing through a given u, v coordinate.
-func (c Camera) Ray(u, v float64) geom.Ray {
+// Ray returns a Ray passing through a given s, t coordinate.
+func (c Camera) Ray(s, t float64) geom.Ray {
+	rd := geom.RandVecInDisk().Scaled(c.lensRadius)
+	offset := c.u.Scaled(rd.X()).Plus(c.v.Scaled(rd.Y()))
+	source := c.origin.Plus(offset)
+	dest := c.lowerLeft.Plus(c.horizontal.Scaled(s).Plus(c.vertical.Scaled(t)))
 	return geom.NewRay(
-		c.origin,
-		c.lowerLeft.Plus((c.horizontal.Scaled(u)).Plus(c.vertical.Scaled(v))).Minus(c.origin).Unit(),
+		source,
+		dest.Minus(source).Unit(),
 	)
 }
