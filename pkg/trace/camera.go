@@ -16,6 +16,7 @@ type Camera struct {
 	lensRadius float64
 }
 
+// NewCamera creates a new Camera
 func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture, focus float64) (c Camera) {
 	theta := vfov * math.Pi / 180
 	halfH := math.Tan(theta / 2)

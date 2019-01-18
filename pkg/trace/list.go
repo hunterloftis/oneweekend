@@ -8,8 +8,8 @@ type List struct {
 }
 
 // NewList creates a new list of Hitters
-func NewList(s ...Hitter) List {
-	return List{HH: s}
+func NewList(h ...Hitter) List {
+	return List{HH: h}
 }
 
 // Hit finds the first intersection (if any) between Ray r and any of the Hitters in the List.
@@ -23,4 +23,8 @@ func (l List) Hit(r geom.Ray, tMin, tMax float64) (t float64, b Bouncer) {
 		}
 	}
 	return
+}
+
+func (l List) Plus(h ...Hitter) List {
+	return NewList(append(l.HH, h...)...)
 }

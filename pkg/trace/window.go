@@ -48,10 +48,10 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 		return err
 	}
 
-	from := geom.NewVec(3, 3, 2)
-	at := geom.NewVec(0, 0, -1)
-	focus := from.Minus(at).Len()
-	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 20, float64(wi.W)/float64(wi.H), 2, focus)
+	from := geom.NewVec(13, 2, 3)
+	at := geom.NewVec(0, 0, 0)
+	focus := 10.0
+	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 20, float64(wi.W)/float64(wi.H), 0.1, focus)
 
 	for y := wi.H - 1; y >= 0; y-- {
 		for x := 0; x < wi.W; x++ {
