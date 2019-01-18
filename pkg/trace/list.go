@@ -25,6 +25,7 @@ func (l *List) Hit(r geom.Ray, tMin, tMax float64) (t float64, b Bouncer) {
 	return
 }
 
+// Add adds new Hitters to this List
 func (l *List) Add(h ...Hitter) int {
 	l.HH = append(l.HH, h...)
 	return len(l.HH)
