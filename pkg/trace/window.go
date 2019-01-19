@@ -11,9 +11,10 @@ import (
 
 const bias = 0.001
 
-// Hitter represents something that can be Hit by a Ray.
-type Hitter interface {
+// HitBoxer represents something that can be Hit by a Ray.
+type HitBoxer interface {
 	Hit(r Ray, tMin, tMax float64) (t float64, s Bouncer)
+	Box(t0, t1 float64) (box *AABB)
 }
 
 // Bouncer represents something that can return Bounce rays out in a direction with attenuation
@@ -32,7 +33,7 @@ func NewWindow(width, height int) Window {
 }
 
 // WritePPM traces each pixel in the Window and writes the results to w in PPM format
-func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
+func (wi Window) WritePPM(w io.Writer, h HitBoxer, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
@@ -69,7 +70,7 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 	return nil
 }
 
-func color(r Ray, h Hitter, depth int) Color {
+func color(r Ray, h HitBoxer, depth int) Color {
 	if depth > 9 {
 		return NewColor(0, 0, 0)
 	}

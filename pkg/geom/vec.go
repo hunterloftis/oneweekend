@@ -129,3 +129,23 @@ func (v Vec) Cross(v2 Vec) Vec {
 		v.E[0]*v2.E[1]-v.E[1]*v2.E[0],
 	)
 }
+
+// Min returns a new Vector using the lowest elements of two vectors
+func (v Vec) Min(v2 Vec) Vec {
+	for i := 0; i < 3; i++ {
+		if v2.E[i] < v.E[i] {
+			v.E[i] = v2.E[i]
+		}
+	}
+	return v
+}
+
+// Max returns a new Vector using the highest element of two vectors
+func (v Vec) Max(v2 Vec) Vec {
+	for i := 0; i < 3; i++ {
+		if v2.E[i] > v.E[i] {
+			v.E[i] = v2.E[i]
+		}
+	}
+	return v
+}

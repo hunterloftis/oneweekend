@@ -15,13 +15,13 @@ func main() {
 	if flag.Parse(); *p {
 		defer profile.Start().Stop()
 	}
-	w := trace.NewWindow(480, 320)
+	w := trace.NewWindow(600, 400)
 	if err := w.WritePPM(os.Stdout, scene(), 100); err != nil {
 		panic(err)
 	}
 }
 
-func scene() *trace.List {
+func scene() *trace.BVH {
 	gray := trace.NewLambert(trace.NewColor(0.5, 0.5, 0.5))
 	l := trace.NewList(
 		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, gray),
@@ -37,13 +37,13 @@ func scene() *trace.List {
 			}
 			m, move := mat()
 			if move {
-				l.Add(trace.NewMovingSphere(center, center.Plus(geom.NewVec(0, 0.5*rand.Float64(), 0)), 0, 1, 0.2, m))
+				l.Add(trace.NewMovingSphere(center, center.Plus(geom.NewVec(0, 0.1*rand.Float64(), 0)), 0, 1, 0.2, m))
 			} else {
 				l.Add(trace.NewSphere(center, 0.2, m))
 			}
 		}
 	}
-	return l
+	return trace.NewBVH(0, 0, 1, l.HH...)
 }
 
 func mat() (trace.Material, bool) {

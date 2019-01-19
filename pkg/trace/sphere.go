@@ -62,8 +62,22 @@ func (s *Sphere) Bounce(in Ray, dist float64) (out Ray, attenuation Color, ok bo
 	return NewRay(p, dir, in.t), attenuation, ok
 }
 
+// Center returns the center of the sphere at a given time t
 func (s *Sphere) Center(t float64) geom.Vec {
 	p := (t - s.T0) / (s.T1 - s.T0)
 	offset := s.Center1.Minus(s.Center0).Scaled(p)
 	return s.Center0.Plus(offset)
+}
+
+// Box returns the Axis Aligned Bounding Box of the sphere encompassing all times between t0 and t1
+func (s *Sphere) Box(t0, t1 float64) (box *AABB) {
+	box0 := NewAABB(
+		s.Center(t0).Minus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
+		s.Center(t0).Plus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
+	)
+	box1 := NewAABB(
+		s.Center(t1).Minus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
+		s.Center(t1).Plus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
+	)
+	return box0.Plus(box1)
 }
