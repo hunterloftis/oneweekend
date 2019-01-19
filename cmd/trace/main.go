@@ -22,11 +22,14 @@ func main() {
 }
 
 func scene() *trace.BVH {
-	gray := trace.NewLambert(trace.NewColor(0.5, 0.5, 0.5))
+	check := trace.NewChecker(10,
+		trace.NewSolid(trace.NewColor(0.2, 0.3, 0.1)),
+		trace.NewSolid(trace.NewColor(0.9, 0.9, 0.9)),
+	)
 	l := trace.NewList(
-		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, gray),
+		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, trace.NewLambert(check)),
 		trace.NewSphere(geom.NewVec(0, 1, 0), 1, trace.NewDielectric(1.5)),
-		trace.NewSphere(geom.NewVec(-4, 1, 0), 1, trace.NewLambert(trace.NewColor(0.4, 0.2, 0.1))),
+		trace.NewSphere(geom.NewVec(-4, 1, 0), 1, trace.NewLambert(trace.NewSolid(trace.NewColor(0.4, 0.2, 0.1)))),
 		trace.NewSphere(geom.NewVec(4, 1, 0), 1, trace.NewMetal(trace.NewColor(0.7, 0.6, 0.5), 0)),
 	)
 	for a := -11.0; a < 11; a++ {
@@ -37,7 +40,7 @@ func scene() *trace.BVH {
 			}
 			m, move := mat()
 			if move {
-				l.Add(trace.NewMovingSphere(center, center.Plus(geom.NewVec(0, 0.1*rand.Float64(), 0)), 0, 1, 0.2, m))
+				l.Add(trace.NewMovingSphere(center, center.Plus(geom.NewVec(0, 0.5*rand.Float64(), 0)), 0, 1, 0.2, m))
 			} else {
 				l.Add(trace.NewSphere(center, 0.2, m))
 			}
@@ -50,7 +53,7 @@ func mat() (trace.Material, bool) {
 	m := rand.Float64()
 	if m < 0.8 {
 		c := trace.NewColor(rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64())
-		return trace.NewLambert(c), true
+		return trace.NewLambert(trace.NewSolid(c)), true
 	}
 	if m < 0.95 {
 		c := trace.NewColor(0.5*(1+rand.Float64()), 0.5*(1+rand.Float64()), 0.5*(1+rand.Float64()))

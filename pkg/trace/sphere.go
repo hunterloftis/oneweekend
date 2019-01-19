@@ -58,7 +58,7 @@ func (s *Sphere) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
 func (s *Sphere) Bounce(in Ray, dist float64) (out Ray, attenuation Color, ok bool) {
 	p := in.At(dist)
 	norm := p.Minus(s.Center(in.t)).Scaled(s.Rad).Unit()
-	dir, attenuation, ok := s.Mat.Scatter(in.Dir, norm)
+	dir, attenuation, ok := s.Mat.Scatter(in.Dir, norm, p)
 	return NewRay(p, dir, in.t), attenuation, ok
 }
 
