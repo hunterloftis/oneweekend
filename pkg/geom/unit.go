@@ -1,5 +1,7 @@
 package geom
 
+import "math/rand"
+
 // Unit represents a unit vector (length 1)
 type Unit struct {
 	Vec
@@ -22,4 +24,10 @@ func (u Unit) Dot(u2 Unit) float64 {
 // Inv inverts the unit vector.
 func (u Unit) Inv() Unit {
 	return Unit{Vec: u.Vec.Inv()}
+}
+
+// RandUnit generates a random unit vector.
+// note: This isn't exactly uniform and could be imprpved.
+func RandUnit() Unit {
+	return NewVec(2*rand.Float64()-1, 2*rand.Float64()-1, 2*rand.Float64()-1).Unit()
 }
