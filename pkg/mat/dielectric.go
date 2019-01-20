@@ -1,10 +1,11 @@
-package trace
+package mat
 
 import (
 	"math"
 	"math/rand"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
+	"github.com/hunterloftis/oneweekend/pkg/tex"
 )
 
 // Dielectric describes a non-metallic material
@@ -18,7 +19,7 @@ func NewDielectric(refractiveIndex float64) Dielectric {
 }
 
 // Scatter reflects or refracts incoming light based on the ratio of indexes of refraction
-func (d Dielectric) Scatter(in, n geom.Unit, _ geom.Vec) (out geom.Unit, attenuation Color, ok bool) {
+func (d Dielectric) Scatter(in, n geom.Unit, _ geom.Vec) (out geom.Unit, attenuation tex.Color, ok bool) {
 	var outNormal geom.Unit
 	var ratio float64
 	var cos float64
@@ -37,7 +38,7 @@ func (d Dielectric) Scatter(in, n geom.Unit, _ geom.Vec) (out geom.Unit, attenua
 	if !refracted || schlick(cos, d.RefIdx) > rand.Float64() {
 		out = reflect(in, n)
 	}
-	return out, NewColor(1, 1, 1), true
+	return out, tex.NewColor(1, 1, 1), true
 }
 
 func refract(u, n geom.Unit, ratio float64) (u2 geom.Unit, ok bool) {

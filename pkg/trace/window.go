@@ -7,6 +7,7 @@ import (
 	"math/rand"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
+	"github.com/hunterloftis/oneweekend/pkg/tex"
 )
 
 const bias = 0.001
@@ -19,7 +20,7 @@ type HitBoxer interface {
 
 // Bouncer represents something that can return Bounce rays out in a direction with attenuation
 type Bouncer interface {
-	Bounce(in Ray, dist float64) (out Ray, attenuation Color, ok bool)
+	Bounce(in Ray, dist float64) (out Ray, attenuation tex.Color, ok bool)
 }
 
 // Window gathers the results of ray traces on a W x H grid.
@@ -51,7 +52,7 @@ func (wi Window) WritePPM(w io.Writer, h HitBoxer, samples int) error {
 
 	for y := wi.H - 1; y >= 0; y-- {
 		for x := 0; x < wi.W; x++ {
-			c := NewColor(0, 0, 0)
+			c := tex.NewColor(0, 0, 0)
 			for s := 0; s < samples; s++ {
 				u := (float64(x) + rand.Float64()) / float64(wi.W)
 				v := (float64(y) + rand.Float64()) / float64(wi.H)
@@ -70,19 +71,19 @@ func (wi Window) WritePPM(w io.Writer, h HitBoxer, samples int) error {
 	return nil
 }
 
-func color(r Ray, h HitBoxer, depth int) Color {
+func color(r Ray, h HitBoxer, depth int) tex.Color {
 	if depth > 9 {
-		return NewColor(0, 0, 0)
+		return tex.NewColor(0, 0, 0)
 	}
 	if d, b := h.Hit(r, bias, math.MaxFloat64); d > 0 {
 		r2, attenuation, ok := b.Bounce(r, d)
 		if !ok {
-			return NewColor(0, 0, 0)
+			return tex.NewColor(0, 0, 0)
 		}
 		return color(r2, h, depth+1).Times(attenuation)
 	}
 	t := 0.5 * (r.Dir.Y() + 1.0)
-	white := NewColor(1, 1, 1).Scaled(1 - t)
-	blue := NewColor(0.5, 0.7, 1).Scaled(t)
+	white := tex.NewColor(1, 1, 1).Scaled(1 - t)
+	blue := tex.NewColor(0.5, 0.7, 1).Scaled(t)
 	return white.Plus(blue)
 }

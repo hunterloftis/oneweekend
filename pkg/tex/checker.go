@@ -1,4 +1,4 @@
-package trace
+package tex
 
 import (
 	"math"
@@ -8,10 +8,10 @@ import (
 
 type Checker struct {
 	Size      float64
-	Odd, Even Texture
+	Odd, Even Mapper
 }
 
-func NewChecker(size float64, t0, t1 Texture) Checker {
+func NewChecker(size float64, t0, t1 Mapper) Checker {
 	return Checker{
 		Size: size,
 		Odd:  t0,
@@ -19,10 +19,10 @@ func NewChecker(size float64, t0, t1 Texture) Checker {
 	}
 }
 
-func (c Checker) At(u, v float64, p geom.Vec) Color {
+func (c Checker) Map(u, v float64, p geom.Vec) Color {
 	sines := math.Sin(c.Size*p.X()) * math.Sin(c.Size*p.Y()) * math.Sin(c.Size*p.Z())
 	if sines < 0 {
-		return c.Odd.At(u, v, p)
+		return c.Odd.Map(u, v, p)
 	}
-	return c.Even.At(u, v, p)
+	return c.Even.Map(u, v, p)
 }
