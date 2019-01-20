@@ -24,7 +24,7 @@ func main() {
 }
 
 func twoPerlinSpheres() *trace.List {
-	perlin := tex.NewNoise()
+	perlin := tex.NewNoise(5)
 	return trace.NewList(
 		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, mat.NewLambert(perlin)),
 		trace.NewSphere(geom.NewVec(0, 2, 0), 2, mat.NewLambert(perlin)),
