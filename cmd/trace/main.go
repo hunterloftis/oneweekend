@@ -18,19 +18,16 @@ func main() {
 		defer profile.Start().Stop()
 	}
 	w := trace.NewWindow(600, 400)
-	if err := w.WritePPM(os.Stdout, cover(), 100); err != nil {
+	if err := w.WritePPM(os.Stdout, twoPerlinSpheres(), 100); err != nil {
 		panic(err)
 	}
 }
 
-func twoSpheres() *trace.List {
-	check := tex.NewChecker(10,
-		tex.NewSolid(tex.NewColor(0.2, 0.3, 0.1)),
-		tex.NewSolid(tex.NewColor(0.9, 0.9, 0.9)),
-	)
+func twoPerlinSpheres() *trace.List {
+	perlin := tex.NewNoise()
 	return trace.NewList(
-		trace.NewSphere(geom.NewVec(0, -10, 0), 10, mat.NewLambert(check)),
-		trace.NewSphere(geom.NewVec(0, 10, 0), 10, mat.NewLambert(check)),
+		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, mat.NewLambert(perlin)),
+		trace.NewSphere(geom.NewVec(0, 2, 0), 2, mat.NewLambert(perlin)),
 	)
 }
 
