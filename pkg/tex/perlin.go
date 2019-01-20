@@ -22,12 +22,12 @@ func init() {
 }
 
 func Perlin(p geom.Vec) float64 {
-	i := int(math.Floor(p.X()))
-	j := int(math.Floor(p.Y()))
-	k := int(math.Floor(p.Z()))
 	u := p.X() - math.Floor(p.X())
 	v := p.Y() - math.Floor(p.Y())
 	w := p.Z() - math.Floor(p.Z())
+	i := int(math.Floor(p.X()))
+	j := int(math.Floor(p.Y()))
+	k := int(math.Floor(p.Z()))
 	c := make([]geom.Unit, 8)
 	for di := 0; di < 2; di++ {
 		for dj := 0; dj < 2; dj++ {
