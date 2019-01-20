@@ -16,12 +16,23 @@ func main() {
 		defer profile.Start().Stop()
 	}
 	w := trace.NewWindow(600, 400)
-	if err := w.WritePPM(os.Stdout, scene(), 100); err != nil {
+	if err := w.WritePPM(os.Stdout, twoSpheres(), 100); err != nil {
 		panic(err)
 	}
 }
 
-func scene() *trace.BVH {
+func twoSpheres() *trace.List {
+	check := trace.NewChecker(10,
+		trace.NewSolid(trace.NewColor(0.2, 0.3, 0.1)),
+		trace.NewSolid(trace.NewColor(0.9, 0.9, 0.9)),
+	)
+	return trace.NewList(
+		trace.NewSphere(geom.NewVec(0, -10, 0), 10, trace.NewLambert(check)),
+		trace.NewSphere(geom.NewVec(0, 10, 0), 10, trace.NewLambert(check)),
+	)
+}
+
+func cover() *trace.BVH {
 	check := trace.NewChecker(10,
 		trace.NewSolid(trace.NewColor(0.2, 0.3, 0.1)),
 		trace.NewSolid(trace.NewColor(0.9, 0.9, 0.9)),
