@@ -11,5 +11,6 @@ func NewNoise(scale float64) Noise {
 }
 
 func (n Noise) Map(u, v float64, p geom.Vec) Color {
-	return NewColor(1, 1, 1).Scaled(Perlin(p.Scaled(n.Scale)))
+	bright := 0.5*Perlin(p.Scaled(n.Scale)) + 0.5
+	return NewColor(1, 1, 1).Scaled(bright)
 }
