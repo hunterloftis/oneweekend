@@ -42,6 +42,18 @@ func Perlin(p geom.Vec) float64 {
 	return interp(c, u, v, w)
 }
 
+func turb(p geom.Vec, depth int) float64 {
+	sum := 0.0
+	p2 := p
+	weight := 1.0
+	for i := 0; i < depth; i++ {
+		sum += weight * Perlin(p2)
+		weight *= 0.5
+		p2 = p2.Scaled(2)
+	}
+	return math.Abs(sum)
+}
+
 func generate() []geom.Unit {
 	p := make([]geom.Unit, 256)
 	for i := 0; i < 256; i++ {
