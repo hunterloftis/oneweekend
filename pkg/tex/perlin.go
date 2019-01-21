@@ -21,6 +21,7 @@ func init() {
 	permZ = generatePerm()
 }
 
+// Perlin maps 3d point p to a Perlin noise value between about -0.63 and 0.63
 func Perlin(p geom.Vec) float64 {
 	u := p.X() - math.Floor(p.X())
 	v := p.Y() - math.Floor(p.Y())
