@@ -45,7 +45,7 @@ func (wi Window) WritePPM(w io.Writer, h HitBoxer, samples int) error {
 		return err
 	}
 
-	from := geom.NewVec(13, 2, 3)
+	from := geom.NewVec(0, 0, 6)
 	at := geom.NewVec(0, 0, 0)
 	focus := 10.0
 	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 20, float64(wi.W)/float64(wi.H), 0, focus, 0, 1)
@@ -77,11 +77,13 @@ func color(r Ray, h HitBoxer, depth int) tex.Color {
 	}
 	if d, b := h.Hit(r, bias, math.MaxFloat64); d > 0 {
 		r2, attenuation, ok := b.Bounce(r, d)
+		return attenuation
 		if !ok {
 			return tex.NewColor(0, 0, 0)
 		}
 		return color(r2, h, depth+1).Times(attenuation)
 	}
+	return tex.NewColor(0, 0, 0)
 	t := 0.5 * (r.Dir.Y() + 1.0)
 	white := tex.NewColor(1, 1, 1).Scaled(1 - t)
 	blue := tex.NewColor(0.5, 0.7, 1).Scaled(t)

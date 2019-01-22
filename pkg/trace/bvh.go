@@ -5,11 +5,14 @@ import (
 	"sort"
 )
 
+// BVH represents a bounding volume hierarchy
 type BVH struct {
 	left, right HitBoxer
 	box         *AABB
 }
 
+// NewBVH creates a new BVH representing HitBoxers given as h between times time0 and time1
+// When manually creating a new BVH, you should pass depth = 0.
 func NewBVH(depth int, time0, time1 float64, h ...HitBoxer) *BVH {
 	b := BVH{}
 	n := len(h)
@@ -36,6 +39,9 @@ func NewBVH(depth int, time0, time1 float64, h ...HitBoxer) *BVH {
 	return &b
 }
 
+// Hit returns the distance d at which Ray r hits this BVH.
+// If the Ray does not intersect with this BVH, d = 0.
+// The returned Bouncer describes the ray's bouncing at this hit point.
 func (b *BVH) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
 	if !b.box.Hit(r, dMin, dMax) {
 		return 0, nil
@@ -57,6 +63,8 @@ func (b *BVH) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
 	return 0, nil
 }
 
+// Box returns a reference to an AABB encompassing the space of
+// every HitBoxer in this BVH from time t0 to t1.
 func (b *BVH) Box(t0, t1 float64) *AABB {
 	return b.box
 }

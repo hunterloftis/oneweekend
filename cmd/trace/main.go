@@ -17,10 +17,22 @@ func main() {
 	if flag.Parse(); *p {
 		defer profile.Start().Stop()
 	}
-	w := trace.NewWindow(600, 400)
-	if err := w.WritePPM(os.Stdout, twoPerlinSpheres(), 100); err != nil {
+	w := trace.NewWindow(500, 500)
+	if err := w.WritePPM(os.Stdout, earth(), 100); err != nil {
 		panic(err)
 	}
+}
+
+func earth() *trace.Sphere {
+	f, err := os.Open("images/earthmap.jpg")
+	if err != nil {
+		panic(err)
+	}
+	t, err := tex.NewImage(f)
+	if err != nil {
+		panic(err)
+	}
+	return trace.NewSphere(geom.NewVec(0, 0, 0), 1, mat.NewLambert(t))
 }
 
 func twoPerlinSpheres() *trace.List {

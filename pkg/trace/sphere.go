@@ -60,7 +60,8 @@ func (s *Sphere) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
 func (s *Sphere) Bounce(in Ray, dist float64) (out Ray, attenuation tex.Color, ok bool) {
 	p := in.At(dist)
 	norm := p.Minus(s.Center(in.t)).Scaled(s.Rad).Unit()
-	dir, attenuation, ok := s.Mat.Scatter(in.Dir, norm, p)
+	u, v := s.UV(p, in.t)
+	dir, attenuation, ok := s.Mat.Scatter(in.Dir, norm, p, u, v)
 	return NewRay(p, dir, in.t), attenuation, ok
 }
 
@@ -82,4 +83,14 @@ func (s *Sphere) Box(t0, t1 float64) (box *AABB) {
 		s.Center(t1).Plus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
 	)
 	return box0.Plus(box1)
+}
+
+// UV returns the u, v spherical-mapped coordinates of this Sphere at point p, time t.
+func (s *Sphere) UV(p geom.Vec, t float64) (u, v float64) {
+	p2 := p.Minus(s.Center(t)).Scaled(1 / s.Rad)
+	phi := math.Atan2(p2.Z(), p2.X())
+	theta := math.Asin(p2.Y())
+	u = 1 - (phi+math.Pi)/(2*math.Pi)
+	v = (theta + math.Pi/2) / math.Pi
+	return
 }

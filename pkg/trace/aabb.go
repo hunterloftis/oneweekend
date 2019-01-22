@@ -2,15 +2,18 @@ package trace
 
 import "github.com/hunterloftis/oneweekend/pkg/geom"
 
+// AABB Represents an axis-aligned bounding box
 type AABB struct {
 	Min geom.Vec
 	Max geom.Vec
 }
 
+// NewAABB creates a new AABB with the given min and max positions
 func NewAABB(min, max geom.Vec) *AABB {
 	return &AABB{Min: min, Max: max}
 }
 
+// Hit returns whether or not a given ray hits the AABB between dMin and dMax distances
 func (a *AABB) Hit(r Ray, dMin, dMax float64) bool {
 	for i := 0; i < 3; i++ {
 		invD := 1 / r.Dir.E[i]
@@ -32,6 +35,8 @@ func (a *AABB) Hit(r Ray, dMin, dMax float64) bool {
 	return true
 }
 
+// Plus returns a new AABB that encompasses the space of both a and b.
+// If b is nil, the new AABB will be equivalent to a.
 func (a *AABB) Plus(b *AABB) *AABB {
 	if b == nil {
 		return NewAABB(a.Min, a.Max)
