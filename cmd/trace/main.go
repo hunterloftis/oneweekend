@@ -17,10 +17,24 @@ func main() {
 	if flag.Parse(); *p {
 		defer profile.Start().Stop()
 	}
-	w := trace.NewWindow(640, 400)
-	if err := w.WritePPM(os.Stdout, simpleLight(), 200); err != nil {
+	w := trace.NewWindow(500, 500)
+	if err := w.WritePPM(os.Stdout, cornell(), 100); err != nil {
 		panic(err)
 	}
+}
+
+func cornell() *trace.List {
+	green := mat.NewLambert(tex.NewSolid(tex.NewColor(0.12, 0.45, 0.15)))
+	red := mat.NewLambert(tex.NewSolid(tex.NewColor(0.65, 0.05, 0.05)))
+	light := mat.NewLight(tex.NewSolid(tex.NewColor(15, 15, 15)))
+	white := mat.NewLambert(tex.NewSolid(tex.NewColor(0.73, 0.73, 0.73)))
+	return trace.NewList(
+		trace.NewRect(geom.NewVec(555, 0, 0), geom.NewVec(555, 555, 555), green),
+		trace.NewRect(geom.NewVec(0, 0, 0), geom.NewVec(0, 555, 555), red),
+		trace.NewRect(geom.NewVec(213, 554, 227), geom.NewVec(343, 554, 332), light),
+		trace.NewRect(geom.NewVec(0, 0, 0), geom.NewVec(555, 0, 555), white),
+		trace.NewRect(geom.NewVec(0, 0, 555), geom.NewVec(555, 555, 555), white),
+	)
 }
 
 func simpleLight() *trace.List {
