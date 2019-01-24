@@ -28,7 +28,7 @@ func simpleLight() *trace.List {
 	return trace.NewList(
 		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, mat.NewLambert(perlin)),
 		trace.NewSphere(geom.NewVec(0, 2, 0), 2, mat.NewLambert(perlin)),
-		// trace.NewSphere(geom.NewVec(0, 7, 0), 2, mat.NewLight(tex.NewSolid(tex.NewColor(4, 4, 4)))),
+		trace.NewSphere(geom.NewVec(0, 7, 0), 2, mat.NewLight(tex.NewSolid(tex.NewColor(4, 4, 4)))),
 		trace.NewRect(geom.NewVec(3, 1, -2), geom.NewVec(5, 3, -2), mat.NewLight(tex.NewSolid(tex.NewColor(4, 4, 4)))),
 	)
 }
