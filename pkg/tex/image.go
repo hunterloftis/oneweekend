@@ -33,9 +33,9 @@ func NewImage(rc io.ReadCloser) (*Image, error) {
 }
 
 // Map maps a u, v coordinate in 3d space p to a Color on the image texture
-func (i *Image) Map(u, v float64, p geom.Vec) Color {
-	x := int(u * float64(i.Nx))
-	y := int((1 - v) * float64(i.Ny))
+func (i *Image) Map(uv, p geom.Vec) Color {
+	x := int(uv.X() * float64(i.Nx))
+	y := int((1 - uv.Y()) * float64(i.Ny))
 	if x < 0 {
 		x = 0
 	}

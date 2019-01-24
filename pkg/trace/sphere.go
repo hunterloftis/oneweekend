@@ -4,8 +4,6 @@ import (
 	"math"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
-	"github.com/hunterloftis/oneweekend/pkg/mat"
-	"github.com/hunterloftis/oneweekend/pkg/tex"
 )
 
 // Sphere represents a spherical Surface
@@ -13,16 +11,16 @@ type Sphere struct {
 	Center0, Center1 geom.Vec
 	T0, T1           float64
 	Rad              float64
-	Mat              mat.Material
+	Mat              Material
 }
 
 // NewSphere creates a new Sphere with the given center and radius.
-func NewSphere(center geom.Vec, radius float64, m mat.Material) *Sphere {
+func NewSphere(center geom.Vec, radius float64, m Material) *Sphere {
 	return NewMovingSphere(center, center, 0, 1, radius, m)
 }
 
 // NewMovingSphere creates a new Sphere with two centers separated by times t0 and t1
-func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m mat.Material) *Sphere {
+func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m Material) *Sphere {
 	return &Sphere{
 		Center0: center0,
 		Center1: center1,
@@ -56,17 +54,11 @@ func (s *Sphere) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
 	return 0, s
 }
 
-// Bounce returns the normal and mat.Material at point p on the Sphere
-func (s *Sphere) Bounce(in Ray, dist float64) (out *Ray, attenuate, emit tex.Color) {
-	p := in.At(dist)
-	norm := p.Minus(s.Center(in.t)).Scaled(s.Rad).Unit()
-	u, v := s.UV(p, in.t)
-	dir, attenuate, ok := s.Mat.Scatter(in.Dir, norm, u, v, p)
-	if ok {
-		r2 := NewRay(p, dir, in.t)
-		out = &r2
-	}
-	emit = s.Mat.Emit(u, v, p)
+// Bounce returns the normal and Material at point p on the Sphere
+func (s *Sphere) Bounce(in Ray, dist float64) (norm geom.Unit, uv, p geom.Vec, mat Material) {
+	p = in.At(dist)
+	norm = p.Minus(s.Center(in.t)).Scaled(s.Rad).Unit()
+	uv = s.UV(p, in.t)
 	return
 }
 
@@ -91,11 +83,11 @@ func (s *Sphere) Box(t0, t1 float64) (box *AABB) {
 }
 
 // UV returns the u, v spherical-mapped coordinates of this Sphere at point p, time t.
-func (s *Sphere) UV(p geom.Vec, t float64) (u, v float64) {
+func (s *Sphere) UV(p geom.Vec, t float64) (uv geom.Vec) {
 	p2 := p.Minus(s.Center(t)).Scaled(1 / s.Rad)
 	phi := math.Atan2(p2.Z(), p2.X())
 	theta := math.Asin(p2.Y())
-	u = 1 - (phi+math.Pi)/(2*math.Pi)
-	v = (theta + math.Pi/2) / math.Pi
-	return
+	u := 1 - (phi+math.Pi)/(2*math.Pi)
+	v := (theta + math.Pi/2) / math.Pi
+	return geom.NewVec(u, v, 0)
 }

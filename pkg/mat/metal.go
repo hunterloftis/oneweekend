@@ -18,10 +18,10 @@ func NewMetal(albedo tex.Color, roughness float64) Metal {
 }
 
 // Scatter reflects incoming light rays about the normal.
-func (m Metal) Scatter(in, n geom.Unit, _, _ float64, _ geom.Vec) (out geom.Unit, attenuation tex.Color, ok bool) {
-	r := reflect(in, n)
+func (m Metal) Scatter(in, norm geom.Unit, uv, p geom.Vec) (out geom.Unit, attenuate tex.Color, ok bool) {
+	r := reflect(in, norm)
 	out = r.Plus(geom.RandVecInSphere().Scaled(m.Rough)).Unit()
-	return out, m.Albedo, out.Dot(n) > 0
+	return out, m.Albedo, out.Dot(norm) > 0
 }
 
 // Reflect reflects this unit vector about a normal vector n.

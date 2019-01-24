@@ -22,10 +22,10 @@ func NewChecker(size float64, t0, t1 Mapper) Checker {
 }
 
 // Map maps a u, v coordinate in 3d space p to a Color
-func (c Checker) Map(u, v float64, p geom.Vec) Color {
+func (c Checker) Map(uv, p geom.Vec) Color {
 	sines := math.Sin(c.Size*p.X()) * math.Sin(c.Size*p.Y()) * math.Sin(c.Size*p.Z())
 	if sines < 0 {
-		return c.Odd.Map(u, v, p)
+		return c.Odd.Map(uv, p)
 	}
-	return c.Even.Map(u, v, p)
+	return c.Even.Map(uv, p)
 }

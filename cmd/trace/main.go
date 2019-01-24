@@ -95,7 +95,7 @@ func cover() *trace.BVH {
 	return trace.NewBVH(0, 0, 1, l.HH...)
 }
 
-func randMat() (mat.Material, bool) {
+func randMat() (trace.Material, bool) {
 	m := rand.Float64()
 	if m < 0.8 {
 		c := tex.NewColor(rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64())

@@ -2,21 +2,19 @@ package trace
 
 import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
-	"github.com/hunterloftis/oneweekend/pkg/mat"
-	"github.com/hunterloftis/oneweekend/pkg/tex"
 )
 
 // Rect represents an axis-aligned rectangle
 type Rect struct {
 	Min, Max geom.Vec
 	Axis     int
-	Mat      mat.Material
+	Mat      Material
 }
 
 // NewRect creates a new Rect with the given min and max points and a Material.
 // One axis of min and max should be equal - that's the axis of the plane of the rectangle.
 // Rects default to XY rects (with an axis of Z).
-func NewRect(min, max geom.Vec, m mat.Material) *Rect {
+func NewRect(min, max geom.Vec, m Material) *Rect {
 	r := Rect{
 		Min: min,
 		Max: max,
@@ -58,7 +56,7 @@ func (r *Rect) Box(t0, t1 float64) (box *AABB) {
 }
 
 // Bounce return the normal, light attenuation, and emittance color of the Rect at a point d distance along Ray in.
-func (r *Rect) Bounce(in Ray, d float64) (out *Ray, attenuate, emit tex.Color) {
+func (r *Rect) Bounce(in Ray, d float64) (norm geom.Unit, uv, p geom.Vec, m Material) {
 	a0 := r.Axis
 	a1 := (a0 + 1) % 3
 	a2 := (a0 + 2) % 3
@@ -66,14 +64,10 @@ func (r *Rect) Bounce(in Ray, d float64) (out *Ray, attenuate, emit tex.Color) {
 	e2 := in.Or.E[a2] + d*in.Dir.E[a2]
 	u := (e1 - r.Min.E[a1]) / (r.Max.E[a1] - r.Min.E[a1])
 	v := (e2 - r.Min.E[a2]) / (r.Max.E[a2] - r.Min.E[a2])
-	p := in.At(d)
-	norm := geom.NewVec(0, 0, 0)
+	p = in.At(d)
+	norm = geom.NewUnit(0, 0, 0)
 	norm.E[a0] = 1
-	dir, attenuate, ok := r.Mat.Scatter(in.Dir, norm.Unit(), u, v, p)
-	if ok {
-		r2 := NewRay(p, dir, in.t)
-		out = &r2
-	}
-	emit = r.Mat.Emit(u, v, p)
+	uv = geom.NewVec(u, v, 0)
+	m = r.Mat
 	return
 }

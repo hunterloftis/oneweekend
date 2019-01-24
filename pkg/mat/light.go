@@ -13,10 +13,10 @@ func NewLight(m tex.Mapper) *Light {
 	return &Light{Mapper: m}
 }
 
-func (l *Light) Scatter(in, n geom.Unit, u, v float64, p geom.Vec) (out geom.Unit, attenuate tex.Color, ok bool) {
+func (l *Light) Scatter(in, norm geom.Unit, uv, p geom.Vec) (out geom.Unit, attenuate tex.Color, ok bool) {
 	return out, attenuate, false
 }
 
-func (l *Light) Emit(u, v float64, p geom.Vec) tex.Color {
-	return l.Mapper.Map(u, v, p)
+func (l *Light) Emit(uv, p geom.Vec) tex.Color {
+	return l.Mapper.Map(uv, p)
 }

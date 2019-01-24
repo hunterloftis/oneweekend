@@ -13,6 +13,6 @@ func NewSolid(c Color) Solid {
 }
 
 // Map maps a u, v coordinate in 3d space p to a Color
-func (s Solid) Map(u, v float64, p geom.Vec) Color {
+func (s Solid) Map(uv, p geom.Vec) Color {
 	return s.C
 }

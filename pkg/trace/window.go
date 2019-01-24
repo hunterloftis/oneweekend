@@ -20,7 +20,13 @@ type Hitter interface {
 // Bouncer represents something that can bounce attenuated light rays.
 // Bounces are not necessarily successful.
 type Bouncer interface {
-	Bounce(in Ray, dist float64) (out *Ray, attenuate, emit tex.Color)
+	Bounce(in Ray, dist float64) (norm geom.Unit, uv, p geom.Vec, m Material)
+}
+
+// Material represents a material that scatters light.
+type Material interface {
+	Scatter(in, norm geom.Unit, uv, p geom.Vec) (out geom.Unit, attenuate tex.Color, ok bool)
+	Emit(uv, p geom.Vec) tex.Color
 }
 
 // Window gathers the results of ray traces on a W x H grid.
@@ -76,11 +82,13 @@ func color(r Ray, h Hitter, depth int) tex.Color {
 		return tex.NewColor(0, 0, 0)
 	}
 	if d, b := h.Hit(r, bias, math.MaxFloat64); d > 0 {
-		r2, attenuate, emit := b.Bounce(r, d)
-		if r2 == nil {
+		norm, uv, p, mat := b.Bounce(r, d)
+		emit := mat.Emit(uv, p)
+		out, attenuate, ok := mat.Scatter(r.Dir, norm, uv, p)
+		if !ok {
 			return emit
 		}
-		indirect := color(*r2, h, depth+1).Times(attenuate)
+		indirect := color(NewRay(p, out, r.t), h, depth+1).Times(attenuate)
 		return emit.Plus(indirect)
 	}
 	return tex.NewColor(0, 0, 0)

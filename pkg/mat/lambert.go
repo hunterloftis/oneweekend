@@ -17,8 +17,8 @@ func NewLambert(albedo tex.Mapper) Lambert {
 }
 
 // Scatter scatters incoming light rays in a hemisphere about the normal.
-func (l Lambert) Scatter(in, n geom.Unit, u, v float64, p geom.Vec) (out geom.Unit, attenuation tex.Color, ok bool) {
+func (l Lambert) Scatter(in, n geom.Unit, uv, p geom.Vec) (out geom.Unit, attenuate tex.Color, ok bool) {
 	out = n.Plus(geom.RandVecInSphere()).Unit()
-	attenuation = l.Albedo.Map(u, v, p)
-	return out, attenuation, true
+	attenuate = l.Albedo.Map(uv, p)
+	return out, attenuate, true
 }
