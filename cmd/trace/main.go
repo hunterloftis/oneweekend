@@ -17,10 +17,20 @@ func main() {
 	if flag.Parse(); *p {
 		defer profile.Start().Stop()
 	}
-	w := trace.NewWindow(500, 500)
-	if err := w.WritePPM(os.Stdout, earth(), 100); err != nil {
+	w := trace.NewWindow(640, 400)
+	if err := w.WritePPM(os.Stdout, simpleLight(), 200); err != nil {
 		panic(err)
 	}
+}
+
+func simpleLight() *trace.List {
+	perlin := tex.NewNoise(4)
+	return trace.NewList(
+		trace.NewSphere(geom.NewVec(0, -1000, 0), 1000, mat.NewLambert(perlin)),
+		trace.NewSphere(geom.NewVec(0, 2, 0), 2, mat.NewLambert(perlin)),
+		// trace.NewSphere(geom.NewVec(0, 7, 0), 2, mat.NewLight(tex.NewSolid(tex.NewColor(4, 4, 4)))),
+		trace.NewRect(geom.NewVec(3, 1, -2), geom.NewVec(5, 3, -2), mat.NewLight(tex.NewSolid(tex.NewColor(4, 4, 4)))),
+	)
 }
 
 func earth() *trace.Sphere {
@@ -71,7 +81,7 @@ func cover() *trace.BVH {
 	return trace.NewBVH(0, 0, 1, l.HH...)
 }
 
-func randMat() (mat.Scatterer, bool) {
+func randMat() (mat.Material, bool) {
 	m := rand.Float64()
 	if m < 0.8 {
 		c := tex.NewColor(rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64())

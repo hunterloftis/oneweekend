@@ -12,15 +12,15 @@ import (
 
 const bias = 0.001
 
-// HitBoxer represents something that can be Hit by a Ray.
-type HitBoxer interface {
+// Hitter represents something that can be Hit by a Ray.
+type Hitter interface {
 	Hit(r Ray, tMin, tMax float64) (t float64, s Bouncer)
-	Box(t0, t1 float64) (box *AABB)
 }
 
-// Bouncer represents something that can return Bounce rays out in a direction with attenuation
+// Bouncer represents something that can bounce attenuated light rays.
+// Bounces are not necessarily successful.
 type Bouncer interface {
-	Bounce(in Ray, dist float64) (out Ray, attenuation tex.Color, ok bool)
+	Bounce(in Ray, dist float64) (out *Ray, attenuate, emit tex.Color)
 }
 
 // Window gathers the results of ray traces on a W x H grid.
@@ -34,7 +34,7 @@ func NewWindow(width, height int) Window {
 }
 
 // WritePPM traces each pixel in the Window and writes the results to w in PPM format
-func (wi Window) WritePPM(w io.Writer, h HitBoxer, samples int) error {
+func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
@@ -45,8 +45,8 @@ func (wi Window) WritePPM(w io.Writer, h HitBoxer, samples int) error {
 		return err
 	}
 
-	from := geom.NewVec(0, 0, 6)
-	at := geom.NewVec(0, 0, 0)
+	from := geom.NewVec(25, 4, 6)
+	at := geom.NewVec(0, 2, 0)
 	focus := 10.0
 	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 20, float64(wi.W)/float64(wi.H), 0, focus, 0, 1)
 
@@ -71,21 +71,17 @@ func (wi Window) WritePPM(w io.Writer, h HitBoxer, samples int) error {
 	return nil
 }
 
-func color(r Ray, h HitBoxer, depth int) tex.Color {
+func color(r Ray, h Hitter, depth int) tex.Color {
 	if depth > 9 {
 		return tex.NewColor(0, 0, 0)
 	}
 	if d, b := h.Hit(r, bias, math.MaxFloat64); d > 0 {
-		r2, attenuation, ok := b.Bounce(r, d)
-		return attenuation
-		if !ok {
-			return tex.NewColor(0, 0, 0)
+		r2, attenuate, emit := b.Bounce(r, d)
+		if r2 == nil {
+			return emit
 		}
-		return color(r2, h, depth+1).Times(attenuation)
+		indirect := color(*r2, h, depth+1).Times(attenuate)
+		return emit.Plus(indirect)
 	}
 	return tex.NewColor(0, 0, 0)
-	t := 0.5 * (r.Dir.Y() + 1.0)
-	white := tex.NewColor(1, 1, 1).Scaled(1 - t)
-	blue := tex.NewColor(0.5, 0.7, 1).Scaled(t)
-	return white.Plus(blue)
 }

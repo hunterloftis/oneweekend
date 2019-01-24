@@ -5,6 +5,12 @@ import (
 	"sort"
 )
 
+// HitBoxer represents a Hitter that also provides bounding box information.
+type HitBoxer interface {
+	Hitter
+	Box(t0, t1 float64) (box *AABB)
+}
+
 // BVH represents a bounding volume hierarchy
 type BVH struct {
 	left, right HitBoxer

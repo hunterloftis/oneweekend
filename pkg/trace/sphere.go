@@ -13,16 +13,16 @@ type Sphere struct {
 	Center0, Center1 geom.Vec
 	T0, T1           float64
 	Rad              float64
-	Mat              mat.Scatterer
+	Mat              mat.Material
 }
 
 // NewSphere creates a new Sphere with the given center and radius.
-func NewSphere(center geom.Vec, radius float64, m mat.Scatterer) *Sphere {
+func NewSphere(center geom.Vec, radius float64, m mat.Material) *Sphere {
 	return NewMovingSphere(center, center, 0, 1, radius, m)
 }
 
 // NewMovingSphere creates a new Sphere with two centers separated by times t0 and t1
-func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m mat.Scatterer) *Sphere {
+func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m mat.Material) *Sphere {
 	return &Sphere{
 		Center0: center0,
 		Center1: center1,
@@ -56,13 +56,18 @@ func (s *Sphere) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
 	return 0, s
 }
 
-// Bounce returns the normal and mat.Scatterer at point p on the Sphere
-func (s *Sphere) Bounce(in Ray, dist float64) (out Ray, attenuation tex.Color, ok bool) {
+// Bounce returns the normal and mat.Material at point p on the Sphere
+func (s *Sphere) Bounce(in Ray, dist float64) (out *Ray, attenuate, emit tex.Color) {
 	p := in.At(dist)
 	norm := p.Minus(s.Center(in.t)).Scaled(s.Rad).Unit()
 	u, v := s.UV(p, in.t)
-	dir, attenuation, ok := s.Mat.Scatter(in.Dir, norm, p, u, v)
-	return NewRay(p, dir, in.t), attenuation, ok
+	dir, attenuate, ok := s.Mat.Scatter(in.Dir, norm, u, v, p)
+	if ok {
+		r2 := NewRay(p, dir, in.t)
+		out = &r2
+	}
+	emit = s.Mat.Emit(u, v, p)
+	return
 }
 
 // Center returns the center of the sphere at a given time t

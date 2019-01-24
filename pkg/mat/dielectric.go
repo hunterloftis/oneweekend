@@ -11,6 +11,7 @@ import (
 // Dielectric describes a non-metallic material
 type Dielectric struct {
 	RefIdx float64
+	nonEmitter
 }
 
 // NewDielectric creates a new material with the given index of refraction.
@@ -19,7 +20,7 @@ func NewDielectric(refractiveIndex float64) Dielectric {
 }
 
 // Scatter reflects or refracts incoming light based on the ratio of indexes of refraction
-func (d Dielectric) Scatter(in, n geom.Unit, _ geom.Vec, _, _ float64) (out geom.Unit, attenuation tex.Color, ok bool) {
+func (d Dielectric) Scatter(in, n geom.Unit, _, _ float64, _ geom.Vec) (out geom.Unit, attenuation tex.Color, ok bool) {
 	var outNormal geom.Unit
 	var ratio float64
 	var cos float64

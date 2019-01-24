@@ -9,6 +9,7 @@ import (
 type Metal struct {
 	Albedo tex.Color
 	Rough  float64
+	nonEmitter
 }
 
 // NewMetal creates a new Metal material with a given color and roughness.
@@ -17,7 +18,7 @@ func NewMetal(albedo tex.Color, roughness float64) Metal {
 }
 
 // Scatter reflects incoming light rays about the normal.
-func (m Metal) Scatter(in, n geom.Unit, _ geom.Vec, _, _ float64) (out geom.Unit, attenuation tex.Color, ok bool) {
+func (m Metal) Scatter(in, n geom.Unit, _, _ float64, _ geom.Vec) (out geom.Unit, attenuation tex.Color, ok bool) {
 	r := reflect(in, n)
 	out = r.Plus(geom.RandVecInSphere().Scaled(m.Rough)).Unit()
 	return out, m.Albedo, out.Dot(n) > 0
