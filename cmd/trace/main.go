@@ -29,11 +29,12 @@ func cornell() *trace.List {
 	light := mat.NewLight(tex.NewSolid(tex.NewColor(15, 15, 15)))
 	white := mat.NewLambert(tex.NewSolid(tex.NewColor(0.73, 0.73, 0.73)))
 	return trace.NewList(
-		trace.NewRect(geom.NewVec(555, 0, 0), geom.NewVec(555, 555, 555), green),
+		trace.NewFlipped(trace.NewRect(geom.NewVec(555, 0, 0), geom.NewVec(555, 555, 555), green)),
 		trace.NewRect(geom.NewVec(0, 0, 0), geom.NewVec(0, 555, 555), red),
 		trace.NewRect(geom.NewVec(213, 554, 227), geom.NewVec(343, 554, 332), light),
+		trace.NewFlipped(trace.NewRect(geom.NewVec(0, 555, 0), geom.NewVec(555, 555, 555), white)),
 		trace.NewRect(geom.NewVec(0, 0, 0), geom.NewVec(555, 0, 555), white),
-		trace.NewRect(geom.NewVec(0, 0, 555), geom.NewVec(555, 555, 555), white),
+		trace.NewFlipped(trace.NewRect(geom.NewVec(0, 0, 555), geom.NewVec(555, 555, 555), white)),
 	)
 }
 
