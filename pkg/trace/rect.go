@@ -48,8 +48,8 @@ func (r *Rect) Hit(in Ray, dMin, dMax float64) (d float64, b Bouncer) {
 	return d, r
 }
 
-// Box returns the Axis Aligned Bounding Box encompassing the Rect.
-func (r *Rect) Box(t0, t1 float64) (box *AABB) {
+// Bounds returns the Axis Aligned Bounding Box encompassing the Rect.
+func (r *Rect) Bounds(t0, t1 float64) *AABB {
 	bias := geom.NewVec(0, 0, 0)
 	bias.E[r.Axis] = 0.001
 	return NewAABB(r.Min.Minus(bias), r.Max.Plus(bias))

@@ -69,17 +69,17 @@ func (s *Sphere) Center(t float64) geom.Vec {
 	return s.Center0.Plus(offset)
 }
 
-// Box returns the Axis Aligned Bounding Box of the sphere encompassing all times between t0 and t1
-func (s *Sphere) Box(t0, t1 float64) (box *AABB) {
-	box0 := NewAABB(
+// Bounds returns the Axis Aligned Bounding Bounds of the sphere encompassing all times between t0 and t1
+func (s *Sphere) Bounds(t0, t1 float64) *AABB {
+	bounds0 := NewAABB(
 		s.Center(t0).Minus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
 		s.Center(t0).Plus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
 	)
-	box1 := NewAABB(
+	bounds1 := NewAABB(
 		s.Center(t1).Minus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
 		s.Center(t1).Plus(geom.NewVec(s.Rad, s.Rad, s.Rad)),
 	)
-	return box0.Plus(box1)
+	return bounds0.Plus(bounds1)
 }
 
 // UV returns the u, v spherical-mapped coordinates of this Sphere at point p, time t.
