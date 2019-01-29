@@ -48,25 +48,25 @@ func NewBVH(depth int, time0, time1 float64, h ...HitBounder) *BVH {
 // Hit returns the distance d at which Ray r hits this BVH.
 // If the Ray does not intersect with this BVH, d = 0.
 // The returned Bouncer describes the ray's bouncing at this hit point.
-func (b *BVH) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
+func (b *BVH) Hit(r Ray, dMin, dMax float64) *Hit {
 	if !b.bounds.Hit(r, dMin, dMax) {
-		return 0, nil
+		return nil
 	}
-	lDist, lBounce := b.left.Hit(r, dMin, dMax)
-	rDist, rBounce := b.right.Hit(r, dMin, dMax)
-	if lDist > 0 && rDist > 0 {
-		if lDist < rDist {
-			return lDist, lBounce
+	lHit := b.left.Hit(r, dMin, dMax)
+	rHit := b.right.Hit(r, dMin, dMax)
+	if lHit != nil && rHit != nil {
+		if lHit.Dist < rHit.Dist {
+			return lHit
 		}
-		return rDist, rBounce
+		return rHit
 	}
-	if lDist > 0 {
-		return lDist, lBounce
+	if lHit != nil {
+		return lHit
 	}
-	if rDist > 0 {
-		return rDist, rBounce
+	if rHit != nil {
+		return rHit
 	}
-	return 0, nil
+	return nil
 }
 
 // Bounds returns a reference to an AABB encompassing the space of

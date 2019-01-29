@@ -12,12 +12,11 @@ func NewList(h ...HitBounder) *List {
 
 // Hit finds the first intersection (if any) between Ray r and any of the HitBounders in the List.
 // If no intersection is found, t = 0.
-func (l *List) Hit(r Ray, dMin, dMax float64) (d float64, b Bouncer) {
-	closest := dMax
+func (l *List) Hit(r Ray, dMin, dMax float64) (nearest *Hit) {
 	for _, h := range l.HH {
-		if hd, hb := h.Hit(r, dMin, closest); hd > 0 {
-			closest, d = hd, hd
-			b = hb
+		if hit := h.Hit(r, dMin, dMax); hit != nil {
+			dMax = hit.Dist
+			nearest = hit
 		}
 	}
 	return

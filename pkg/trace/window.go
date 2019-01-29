@@ -12,15 +12,18 @@ import (
 
 const bias = 0.001
 
-// Hitter represents something that can be Hit by a Ray.
-type Hitter interface {
-	Hit(r Ray, tMin, tMax float64) (t float64, s Bouncer)
+// Hit records the details of a Ray->Surface intersection.
+type Hit struct {
+	Dist float64
+	Norm geom.Unit
+	UV   geom.Vec
+	Pt   geom.Vec
+	Mat  Material
 }
 
-// Bouncer represents something that can bounce attenuated light rays.
-// Bounces are not necessarily successful.
-type Bouncer interface {
-	Bounce(in Ray, dist float64) (norm geom.Unit, uv, p geom.Vec, m Material)
+// Hitter represents something that can be Hit by a Ray.
+type Hitter interface {
+	Hit(r Ray, dMin, dMax float64) *Hit
 }
 
 // Material represents a material that scatters light.
@@ -81,14 +84,13 @@ func color(r Ray, h Hitter, depth int) tex.Color {
 	if depth > 9 {
 		return tex.NewColor(0, 0, 0)
 	}
-	if d, b := h.Hit(r, bias, math.MaxFloat64); d > 0 {
-		norm, uv, p, mat := b.Bounce(r, d)
-		emit := mat.Emit(uv, p)
-		out, attenuate, ok := mat.Scatter(r.Dir, norm, uv, p)
+	if hit := h.Hit(r, bias, math.MaxFloat64); hit != nil {
+		emit := hit.Mat.Emit(hit.UV, hit.Pt)
+		out, attenuate, ok := hit.Mat.Scatter(r.Dir, hit.Norm, hit.UV, hit.Pt)
 		if !ok {
 			return emit
 		}
-		indirect := color(NewRay(p, out, r.t), h, depth+1).Times(attenuate)
+		indirect := color(NewRay(hit.Pt, out, r.t), h, depth+1).Times(attenuate)
 		return emit.Plus(indirect)
 	}
 	return tex.NewColor(0, 0, 0)

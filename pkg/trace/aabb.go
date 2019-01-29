@@ -43,3 +43,24 @@ func (a *AABB) Plus(b *AABB) *AABB {
 	}
 	return NewAABB(a.Min.Min(b.Min), a.Max.Max(b.Max))
 }
+
+// Corners returns a slice of the eight corners of this bounding box.
+func (a *AABB) Corners() []geom.Vec {
+	c := make([]geom.Vec, 0, 8)
+	for i := 0.0; i < 2; i++ {
+		for j := 0.0; j < 2; j++ {
+			for k := 0.0; k < 2; k++ {
+				x := i*a.Min.X() + (1-i)*a.Max.X()
+				y := j*a.Min.Y() + (1-i)*a.Max.Y()
+				z := k*a.Min.Z() + (1-i)*a.Max.Z()
+				c = append(c, geom.NewVec(x, y, z))
+			}
+		}
+	}
+	return c
+}
+
+// Extended returns a new bounding box that encloses Vector v.
+func (a *AABB) Extended(v geom.Vec) *AABB {
+	return NewAABB(a.Min.Min(v), a.Max.Max(v))
+}

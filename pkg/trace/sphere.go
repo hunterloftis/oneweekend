@@ -33,33 +33,31 @@ func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m Materi
 
 // Hit finds the distance to the first intersection (if any) between Ray r and the Sphere's surface.
 // If no intersection is found, d = 0.
-func (s *Sphere) Hit(r Ray, dMin, dMax float64) (d float64, bo Bouncer) {
+func (s *Sphere) Hit(r Ray, dMin, dMax float64) *Hit {
 	oc := r.Or.Minus(s.Center(r.t))
 	a := r.Dir.Dot(r.Dir)
 	b := oc.Dot(r.Dir.Vec)
 	c := oc.Dot(oc) - s.Rad*s.Rad
 	disc := b*b - a*c
 	if disc <= 0 {
-		return 0, s
+		return nil
 	}
 	sqrt := math.Sqrt(b*b - a*c)
-	d = (-b - sqrt) / a
-	if d > dMin && d < dMax {
-		return d, s
+	d := (-b - sqrt) / a
+	if d <= dMin || d >= dMax {
+		d = (-b + sqrt) / a
+		if d <= dMin || d >= dMax {
+			return nil
+		}
 	}
-	d = (-b + sqrt) / a
-	if d > dMin && d < dMax {
-		return d, s
+	p := r.At(d)
+	return &Hit{
+		Dist: d,
+		Norm: p.Minus(s.Center(r.t)).Scaled(s.Rad).Unit(),
+		UV:   s.UV(p, r.t),
+		Pt:   p,
+		Mat:  s.Mat,
 	}
-	return 0, s
-}
-
-// Bounce returns the normal and Material at point p on the Sphere
-func (s *Sphere) Bounce(in Ray, dist float64) (norm geom.Unit, uv, p geom.Vec, mat Material) {
-	p = in.At(dist)
-	norm = p.Minus(s.Center(in.t)).Scaled(s.Rad).Unit()
-	uv = s.UV(p, in.t)
-	return
 }
 
 // Center returns the center of the sphere at a given time t
