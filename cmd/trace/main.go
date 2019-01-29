@@ -18,7 +18,7 @@ func main() {
 		defer profile.Start().Stop()
 	}
 	w := trace.NewWindow(500, 500)
-	if err := w.WritePPM(os.Stdout, cornellSmoke(), 50); err != nil {
+	if err := w.WritePPM(os.Stdout, cornellSmoke(), 500); err != nil {
 		panic(err)
 	}
 }
@@ -28,10 +28,10 @@ func cornellSmoke() *trace.List {
 	red := mat.NewLambert(tex.NewSolid(tex.NewColor(0.65, 0.05, 0.05)))
 	light := mat.NewLight(tex.NewSolid(tex.NewColor(7, 7, 7)))
 	white := mat.NewLambert(tex.NewSolid(tex.NewColor(0.73, 0.73, 0.73)))
-	// smoke := mat.NewIsotropic(tex.NewSolid(tex.NewColor(0, 0, 0)))
-	// fog := mat.NewIsotropic(tex.NewSolid(tex.NewColor(1, 1, 1)))
-	// b1 := trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 165, 165), white), -18), geom.NewVec(130, 0, 65))
-	// b2 := trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 330, 165), white), 15), geom.NewVec(265, 0, 295))
+	smoke := mat.NewIsotropic(tex.NewSolid(tex.NewColor(0, 0, 0)))
+	fog := mat.NewIsotropic(tex.NewSolid(tex.NewColor(1, 1, 1)))
+	b1 := trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 165, 165), white), -18), geom.NewVec(130, 0, 65))
+	b2 := trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 330, 165), white), 15), geom.NewVec(265, 0, 295))
 	return trace.NewList(
 		trace.NewFlipped(trace.NewRect(geom.NewVec(555, 0, 0), geom.NewVec(555, 555, 555), green)),
 		trace.NewRect(geom.NewVec(0, 0, 0), geom.NewVec(0, 555, 555), red),
@@ -39,8 +39,8 @@ func cornellSmoke() *trace.List {
 		trace.NewFlipped(trace.NewRect(geom.NewVec(0, 555, 0), geom.NewVec(555, 555, 555), white)),
 		trace.NewRect(geom.NewVec(0, 0, 0), geom.NewVec(555, 0, 555), white),
 		trace.NewFlipped(trace.NewRect(geom.NewVec(0, 0, 555), geom.NewVec(555, 555, 555), white)),
-		// trace.NewVolume(b1, 0.01, fog),
-		// trace.NewVolume(b2, 0.01, smoke),
+		trace.NewVolume(b1, 0.01, fog),
+		trace.NewVolume(b2, 0.01, smoke),
 	)
 }
 
