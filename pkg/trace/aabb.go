@@ -51,8 +51,8 @@ func (a *AABB) Corners() []geom.Vec {
 		for j := 0.0; j < 2; j++ {
 			for k := 0.0; k < 2; k++ {
 				x := i*a.Min.X() + (1-i)*a.Max.X()
-				y := j*a.Min.Y() + (1-i)*a.Max.Y()
-				z := k*a.Min.Z() + (1-i)*a.Max.Z()
+				y := j*a.Min.Y() + (1-j)*a.Max.Y()
+				z := k*a.Min.Z() + (1-k)*a.Max.Z()
 				c = append(c, geom.NewVec(x, y, z))
 			}
 		}

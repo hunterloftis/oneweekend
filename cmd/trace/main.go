@@ -18,7 +18,7 @@ func main() {
 		defer profile.Start().Stop()
 	}
 	w := trace.NewWindow(500, 500)
-	if err := w.WritePPM(os.Stdout, cornell(), 50); err != nil {
+	if err := w.WritePPM(os.Stdout, cornell(), 200); err != nil {
 		panic(err)
 	}
 }
@@ -35,10 +35,8 @@ func cornell() *trace.List {
 		trace.NewFlipped(trace.NewRect(geom.NewVec(0, 555, 0), geom.NewVec(555, 555, 555), white)),
 		trace.NewRect(geom.NewVec(0, 0, 0), geom.NewVec(555, 0, 555), white),
 		trace.NewFlipped(trace.NewRect(geom.NewVec(0, 0, 555), geom.NewVec(555, 555, 555), white)),
-		trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 165, 165), white),
-		// trace.NewRotateY(trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 165, 165), white), -18),
-		// trace.NewRotateY(trace.NewBox(geom.NewVec(130, 0, 65), geom.NewVec(295, 165, 230), white), -18),
-		// trace.NewRotateY(trace.NewBox(geom.NewVec(265, 0, 295), geom.NewVec(430, 330, 460), white), 15),
+		trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 165, 165), white), -18), geom.NewVec(130, 0, 65)),
+		trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.NewVec(0, 0, 0), geom.NewVec(165, 330, 165), white), 15), geom.NewVec(265, 0, 295)),
 	)
 }
 
