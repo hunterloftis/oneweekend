@@ -69,9 +69,9 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 				c = c.Plus(color(r, h, 0))
 			}
 			c = c.Scaled(1 / float64(samples)).Gamma(2)
-			ir := int(255.99 * c.R())
-			ig := int(255.99 * c.G())
-			ib := int(255.99 * c.B())
+			ir := int(math.Min(255, 255.99*c.R()))
+			ig := int(math.Min(255, 255.99*c.G()))
+			ib := int(math.Min(255, 255.99*c.B()))
 			if _, err := fmt.Fprintln(w, ir, ig, ib); err != nil {
 				return err
 			}
