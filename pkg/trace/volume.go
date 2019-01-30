@@ -39,15 +39,11 @@ func (v *Volume) Hit(r Ray, dMin, dMax float64) *Hit {
 	if hit1.Dist > hit2.Dist {
 		return nil
 	}
-	if hit1.Dist < 0 {
-		hit1.Dist = 0
-	}
-	dInside := hit2.Dist - hit1.Dist
 	dHit := -(1 / v.density) * math.Log(rand.Float64())
-	if dHit >= dInside {
+	d := hit1.Dist + dHit
+	if d >= hit2.Dist {
 		return nil
 	}
-	d := hit1.Dist + dHit
 	return &Hit{
 		Dist: d,
 		Norm: geom.NewUnit(1, 0, 0),
