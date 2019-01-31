@@ -54,7 +54,7 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 		return err
 	}
 
-	from := geom.NewVec(278, 278, -800)
+	from := geom.NewVec(478, 278, -600)
 	at := geom.NewVec(278, 278, 0)
 	focus := 10.0
 	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 40, float64(wi.W)/float64(wi.H), 0, focus, 0, 1)
@@ -81,7 +81,7 @@ func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
 }
 
 func color(r Ray, h Hitter, depth int) tex.Color {
-	if depth > 9 {
+	if depth > 50 {
 		return tex.NewColor(0, 0, 0)
 	}
 	if hit := h.Hit(r, bias, math.MaxFloat64); hit != nil {

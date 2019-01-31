@@ -149,3 +149,8 @@ func (v Vec) Max(v2 Vec) Vec {
 	}
 	return v
 }
+
+// Zero returns true when v is a zero vector (0, 0, 0)
+func (v Vec) Zero() bool {
+	return v.E[0] == 0 && v.E[1] == 0 && v.E[2] == 0
+}

@@ -27,7 +27,7 @@ func (u Unit) Inv() Unit {
 }
 
 // RandUnit generates a random unit vector.
-// note: This isn't exactly uniform and could be imprpved.
+// note: This isn't exactly uniform and could be improved.
 func RandUnit() Unit {
 	return NewVec(2*rand.Float64()-1, 2*rand.Float64()-1, 2*rand.Float64()-1).Unit()
 }

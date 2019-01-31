@@ -18,6 +18,6 @@ func NewNoise(scale float64) Noise {
 
 // Map maps a u, v coordinate in 3d space p to a Color
 func (n Noise) Map(uv, p geom.Vec) Color {
-	bright := 0.5 * (1 + math.Sin(n.Scale*p.Z()+10*turb(p, 7)))
+	bright := 0.5 * (1 + math.Sin(n.Scale*p.X()+5*turb(p.Scaled(n.Scale), 7)))
 	return NewColor(1, 1, 1).Scaled(bright)
 }
