@@ -13,11 +13,11 @@ doc:
 profile:
 	go build ./cmd/trace
 	./trace -profile > test.ppm
-	@echo 'Next, go tool pprof --pdf ./trace /tmp/path/to/cpu.pprof > cpu.pdf'
+	@echo '$ go tool pprof --pdf ./trace /tmp/path/to/cpu.pprof > cpu.pdf && open cpu.pdf'
 
+# https://inteligencia-analitica.com/wp-content/uploads/2017/08/Installing-Graphviz-and-pydotplus.pdf
 profwin:
-	PATH %PATH%;C:\Program Files (x86)\Graphviz2.38\bin
 	go build ./cmd/trace
 	trace.exe -profile > test.ppm
-	go tool pprof --pdf ./trace.exe C:\path\to\cpu.pprof > cpu.pdf
-	start cpu.pdf
+	@echo '> go tool pprof --pdf ./trace.exe C:\path\to\cpu.pprof > cpu.pdf && start cpu.pdf'
+

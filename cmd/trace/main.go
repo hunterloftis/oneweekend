@@ -17,8 +17,8 @@ func main() {
 	if flag.Parse(); *p {
 		defer profile.Start().Stop()
 	}
-	w := trace.NewWindow(500, 500)
-	if err := w.WritePPM(os.Stdout, final(), 1000); err != nil {
+	w := trace.NewWindow(898, 898)
+	if err := w.WritePPM(os.Stdout, final(), 5000); err != nil {
 		panic(err)
 	}
 }
