@@ -5,93 +5,150 @@ import (
 	"io"
 	"math"
 	"math/rand"
+	"runtime"
+	"time"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
-	"github.com/hunterloftis/oneweekend/pkg/tex"
 )
 
-const bias = 0.001
-
-// Hit records the details of a Ray->Surface intersection.
-type Hit struct {
-	Dist float64
-	Norm geom.Unit
-	UV   geom.Vec
-	Pt   geom.Vec
-	Mat  Material
-}
-
-// Hitter represents something that can be Hit by a Ray.
-type Hitter interface {
-	Hit(r Ray, dMin, dMax float64) *Hit
-}
-
-// Material represents a material that scatters light.
-type Material interface {
-	Scatter(in, norm geom.Unit, uv, p geom.Vec) (out geom.Unit, attenuate tex.Color, ok bool)
-	Emit(uv, p geom.Vec) tex.Color
-}
-
-// Window gathers the results of ray traces on a W x H grid.
+// Window gathers the results of ray traces on a width x height grid.
 type Window struct {
-	W, H int
+	width, height int
 }
 
 // NewWindow creates a new Window with specific dimensions
 func NewWindow(width, height int) Window {
-	return Window{W: width, H: height}
+	return Window{width: width, height: height}
+}
+
+func (wi Window) Aspect() float64 {
+	return float64(wi.width) / float64(wi.height)
+}
+
+type result struct {
+	row    int
+	pixels string
 }
 
 // WritePPM traces each pixel in the Window and writes the results to w in PPM format
-func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
+func (wi Window) WritePPM(w io.Writer, cam Camera, s Surface, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
-	if _, err := fmt.Fprintln(w, wi.W, wi.H); err != nil {
+	if _, err := fmt.Fprintln(w, wi.width, wi.height); err != nil {
 		return err
 	}
 	if _, err := fmt.Fprintln(w, "255"); err != nil {
 		return err
 	}
 
-	from := geom.NewVec(478, 278, -600)
-	at := geom.NewVec(278, 278, 0)
-	focus := 10.0
-	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 40, float64(wi.W)/float64(wi.H), 0, focus, 0, 1)
-
-	for y := wi.H - 1; y >= 0; y-- {
-		for x := 0; x < wi.W; x++ {
-			c := tex.NewColor(0, 0, 0)
-			for s := 0; s < samples; s++ {
-				u := (float64(x) + rand.Float64()) / float64(wi.W)
-				v := (float64(y) + rand.Float64()) / float64(wi.H)
-				r := cam.Ray(u, v)
-				c = c.Plus(color(r, h, 0))
+	worker := func(jobs <-chan int, results chan<- result, rnd *rand.Rand) {
+		for y := range jobs {
+			res := result{row: y, pixels: ""}
+			for x := 0; x < wi.width; x++ {
+				c := NewColor(0, 0, 0)
+				for n := 0; n < samples; n++ {
+					u := (float64(x) + rnd.Float64()) / float64(wi.width)
+					v := 1 - (float64(y)+rnd.Float64())/float64(wi.height)
+					r := cam.Ray(u, v, rnd)
+					c = c.Plus(color(r, s, 0, rnd))
+				}
+				c = c.Scaled(1 / float64(samples)).Gamma(2)
+				ir := int(math.Min(255, 255.99*c.R()))
+				ig := int(math.Min(255, 255.99*c.G()))
+				ib := int(math.Min(255, 255.99*c.B()))
+				res.pixels += fmt.Sprintln(ir, ig, ib)
 			}
-			c = c.Scaled(1 / float64(samples)).Gamma(2)
-			ir := int(math.Min(255, 255.99*c.R()))
-			ig := int(math.Min(255, 255.99*c.G()))
-			ib := int(math.Min(255, 255.99*c.B()))
-			if _, err := fmt.Fprintln(w, ir, ig, ib); err != nil {
-				return err
-			}
+			results <- res
 		}
 	}
+
+	workers := runtime.NumCPU() + 1
+	jobs := make(chan int, wi.height)
+	results := make(chan result, workers+1)
+	pending := make(map[int]string, 0)
+	cursor := 0
+
+	for w := 0; w < workers; w++ {
+		go worker(jobs, results, rand.New(rand.NewSource(time.Now().Unix())))
+	}
+	for y := 0; y < wi.height; y++ {
+		jobs <- y
+	}
+	close(jobs)
+	for y := 0; y < wi.height; y++ {
+		// fmt.Fprintln(os.Stderr, "waiting for results...")
+		r := <-results
+		// fmt.Fprintln(os.Stderr, "got results for", r.row)
+		pending[r.row] = r.pixels
+		for pending[cursor] != "" {
+			fmt.Fprint(w, pending[cursor])
+			delete(pending, cursor)
+			cursor++
+		}
+	}
+
 	return nil
 }
 
-func color(r Ray, h Hitter, depth int) tex.Color {
+func color(r Ray, h Surface, depth int, rnd *rand.Rand) Color {
 	if depth > 50 {
-		return tex.NewColor(0, 0, 0)
+		return NewColor(0, 0, 0)
 	}
-	if hit := h.Hit(r, bias, math.MaxFloat64); hit != nil {
+	if hit := h.Hit(r, bias, math.MaxFloat64, rnd); hit != nil {
 		emit := hit.Mat.Emit(hit.UV, hit.Pt)
-		out, attenuate, ok := hit.Mat.Scatter(r.Dir, hit.Norm, hit.UV, hit.Pt)
+		out, attenuate, ok := hit.Mat.Scatter(r.Dir, hit.Norm, hit.UV, hit.Pt, rnd)
 		if !ok {
 			return emit
 		}
-		indirect := color(NewRay(hit.Pt, out, r.t), h, depth+1).Times(attenuate)
+		indirect := color(NewRay(hit.Pt, out, r.T), h, depth+1, rnd).Times(attenuate)
 		return emit.Plus(indirect)
 	}
-	return tex.NewColor(0, 0, 0)
+	return NewColor(0, 0, 0)
+}
+
+// Camera originates Rays.
+type Camera struct {
+	lowerLeft    geom.Vec
+	horizontal   geom.Vec
+	vertical     geom.Vec
+	origin       geom.Vec
+	u, v, w      geom.Unit
+	lensRadius   float64
+	time0, time1 float64
+}
+
+// NewCamera creates a new Camera
+// TODO: this argument list is getting pretty ridiculous
+func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture, focus, t0, t1 float64) (c Camera) {
+	theta := vfov * math.Pi / 180
+	halfH := math.Tan(theta / 2)
+	halfW := aspect * halfH
+
+	c.w = lookFrom.Minus(lookAt).Unit()
+	c.u = vup.Cross(c.w.Vec).Unit()
+	c.v = c.w.Cross(c.u.Vec).Unit()
+
+	width := c.u.Scaled(halfW * focus)
+	height := c.v.Scaled(halfH * focus)
+	dist := c.w.Scaled(focus)
+
+	c.time0 = t0
+	c.time1 = t1
+	c.lensRadius = aperture / 2
+	c.origin = lookFrom
+	c.lowerLeft = c.origin.Minus(width).Minus(height).Minus(dist)
+	c.horizontal = width.Scaled(2)
+	c.vertical = height.Scaled(2)
+	return
+}
+
+// Ray returns a Ray passing through a given s, t coordinate.
+func (c Camera) Ray(s, t float64, rnd *rand.Rand) Ray {
+	rd := geom.RandVecInDisk(rnd).Scaled(c.lensRadius)
+	offset := c.u.Scaled(rd.X()).Plus(c.v.Scaled(rd.Y()))
+	source := c.origin.Plus(offset)
+	dest := c.lowerLeft.Plus(c.horizontal.Scaled(s).Plus(c.vertical.Scaled(t)))
+	time := c.time0 + (c.time1-c.time0)*rnd.Float64()
+	return NewRay(source, dest.Minus(source).Unit(), time)
 }

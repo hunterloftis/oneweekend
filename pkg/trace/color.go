@@ -1,4 +1,4 @@
-package tex
+package trace
 
 import (
 	"math"
@@ -12,10 +12,10 @@ type Color struct {
 }
 
 // NewColor creates a Color from 3 float values
-func NewColor(e0, e1, e2 float64) (c Color) {
-	c.E[0] = e0
-	c.E[1] = e1
-	c.E[2] = e2
+func NewColor(r, g, b float64) (c Color) {
+	c.E[0] = r
+	c.E[1] = g
+	c.E[2] = b
 	return
 }
 

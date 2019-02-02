@@ -1,0 +1,14 @@
+# nmake -f Makefile.win profile
+
+test:
+	go build ./cmd/trace
+	trace.exe > test.ppm && start test.ppm
+
+# add graphviz and nmake to path:
+# https://inteligencia-analitica.com/wp-content/uploads/2017/08/Installing-Graphviz-and-pydotplus.pdf
+# C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx64\x64
+profile:
+	go build ./cmd/trace
+	trace.exe -profile > test.ppm
+	go tool pprof --pdf ./trace.exe cpu.pprof > cpu.pdf && start cpu.pdf
+

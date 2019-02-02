@@ -1,8 +1,9 @@
-package tex
+package trace
 
 import (
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
@@ -15,14 +16,15 @@ var (
 )
 
 func init() {
-	rndUnit = generate()
-	permX = generatePerm()
-	permY = generatePerm()
-	permZ = generatePerm()
+	rnd := rand.New(rand.NewSource(time.Now().Unix()))
+	rndUnit = generate(rnd)
+	permX = generatePerm(rnd)
+	permY = generatePerm(rnd)
+	permZ = generatePerm(rnd)
 }
 
-// Perlin maps 3d point p to a Perlin noise value between about -0.63 and 0.63
-func Perlin(p geom.Vec) float64 {
+// perlin maps 3d point p to a Perlin noise value between about -0.63 and 0.63
+func perlin(p geom.Vec) float64 {
 	u := p.X() - math.Floor(p.X())
 	v := p.Y() - math.Floor(p.Y())
 	w := p.Z() - math.Floor(p.Z())
@@ -48,34 +50,34 @@ func turb(p geom.Vec, depth int) float64 {
 	p2 := p
 	weight := 1.0
 	for i := 0; i < depth; i++ {
-		sum += weight * Perlin(p2)
+		sum += weight * perlin(p2)
 		weight *= 0.5
 		p2 = p2.Scaled(2)
 	}
 	return math.Abs(sum)
 }
 
-func generate() []geom.Unit {
+func generate(rnd *rand.Rand) []geom.Unit {
 	p := make([]geom.Unit, 256)
 	for i := 0; i < 256; i++ {
-		p[i] = geom.RandUnit()
+		p[i] = geom.RandUnit(rnd)
 	}
 	return p
 }
 
-func permute(p []int, n int) {
+func permute(p []int, n int, rnd *rand.Rand) {
 	for i := n - 1; i > 0; i-- {
-		target := int(rand.Float64() * float64(i+1))
+		target := int(rnd.Float64() * float64(i+1))
 		p[i], p[target] = p[target], p[i]
 	}
 }
 
-func generatePerm() []int {
+func generatePerm(rnd *rand.Rand) []int {
 	p := make([]int, 256)
 	for i := 0; i < 256; i++ {
 		p[i] = i
 	}
-	permute(p, 256)
+	permute(p, 256, rnd)
 	return p
 }
 

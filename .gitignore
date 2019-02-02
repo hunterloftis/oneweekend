@@ -4,3 +4,4 @@
 /assets
 /*.pdf
 .DS_Store
+*.pprof

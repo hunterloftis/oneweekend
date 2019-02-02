@@ -6,7 +6,7 @@ import "github.com/hunterloftis/oneweekend/pkg/geom"
 type Ray struct {
 	Or  geom.Vec
 	Dir geom.Unit
-	t   float64
+	T   float64
 }
 
 // NewRay creates a new ray given an origin, direction, and point in time
@@ -14,11 +14,11 @@ func NewRay(origin geom.Vec, direction geom.Unit, time float64) Ray {
 	return Ray{
 		Or:  origin,
 		Dir: direction,
-		t:   time,
+		T:   time,
 	}
 }
 
-// At returns the ray at point t
-func (r Ray) At(t float64) geom.Vec {
-	return r.Or.Plus(r.Dir.Scaled(t))
+// At returns the position of the ray at distance d.
+func (r Ray) At(d float64) geom.Vec {
+	return r.Or.Plus(r.Dir.Scaled(d))
 }

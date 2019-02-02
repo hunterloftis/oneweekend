@@ -13,15 +13,15 @@ type Vec struct {
 }
 
 // NewVec creates a Vec from 3 float values
-func NewVec(e0, e1, e2 float64) Vec {
-	return Vec{E: [3]float64{e0, e1, e2}}
+func NewVec(x, y, z float64) Vec {
+	return Vec{E: [3]float64{x, y, z}}
 }
 
 // RandVecInSphere creates a random Vec within a unit sphere
 // TODO: I don't like rejection methods. Isn't there a way to generate 2 angles and accomplish the same thing reliably?
-func RandVecInSphere() Vec {
+func RandVecInSphere(rnd *rand.Rand) Vec {
 	for {
-		v := NewVec(rand.Float64(), rand.Float64(), rand.Float64()).Scaled(2).Minus(NewVec(1, 1, 1))
+		v := NewVec(rnd.Float64(), rnd.Float64(), rnd.Float64()).Scaled(2).Minus(NewVec(1, 1, 1))
 		if v.LenSq() < 1 {
 			return v
 		}
@@ -30,10 +30,10 @@ func RandVecInSphere() Vec {
 
 // RandVecInDisk creates a random Vec within a unit disk
 // TODO: more rejection methods :/
-func RandVecInDisk() Vec {
+func RandVecInDisk(rnd *rand.Rand) Vec {
 	xy := NewVec(1, 1, 0)
 	for {
-		v := NewVec(rand.Float64(), rand.Float64(), 0).Scaled(2).Minus(xy)
+		v := NewVec(rnd.Float64(), rnd.Float64(), 0).Scaled(2).Minus(xy)
 		if v.Dot(v) < 1 {
 			return v
 		}
@@ -148,9 +148,4 @@ func (v Vec) Max(v2 Vec) Vec {
 		}
 	}
 	return v
-}
-
-// Zero returns true when v is a zero vector (0, 0, 0)
-func (v Vec) Zero() bool {
-	return v.E[0] == 0 && v.E[1] == 0 && v.E[2] == 0
 }
