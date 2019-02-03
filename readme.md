@@ -4,8 +4,8 @@ This is a chapter-by-chapter progression through the excellent
 free [ray-tracing books](https://drive.google.com/drive/folders/14yayBb9XiL16lmuhbYhhvea8mKUUK77W)
 by Peter Shirley:
 
-- [Ray Tracing in One Weekend](https://github.com/hunterloftis/oneweekend/tree/oneweekend#ray-tracing-in-one-weekend)
-- [Ray Tracing: the Next Week](https://github.com/hunterloftis/oneweekend/tree/master#ray-tracing-the-next-week)
+- [Ray Tracing in One Weekend](#ray-tracing-in-one-weekend)
+- [Ray Tracing: the Next Week](#ray-tracing-the-next-week)
 
 [![GoDoc](https://godoc.org/github.com/hunterloftis/oneweekend/oneweekend?status.svg)](https://godoc.org/github.com/hunterloftis/oneweekend)
 
