@@ -13,7 +13,7 @@ const costIntersect = 2
 type BVH struct {
 	left, right *BVH
 	leaf        Surface
-	bounds      AABB
+	bounds      *AABB
 }
 
 // NewBVH creates a new BVH representing Surfaces given as h between times time0 and time1.
@@ -79,9 +79,9 @@ func (b *BVH) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	return nil
 }
 
-// Bounds returns a reference to an AABB encompassing the space of
+// Bounds returns a reference to an *AABB encompassing the space of
 // every Surface in this BVH from time t0 to t1.
-func (b *BVH) Bounds(t0, t1 float64) AABB {
+func (b *BVH) Bounds(t0, t1 float64) *AABB {
 	return b.bounds
 }
 
@@ -108,16 +108,12 @@ func cost(t0, t1 float64, ll, rr []Surface) float64 {
 	return costTraverse + costIntersect*(costLeft+costRight)
 }
 
-func boundsAround(t0, t1 float64, ss []Surface) (b AABB) {
+func boundsAround(t0, t1 float64, ss []Surface) (b *AABB) {
 	if len(ss) == 0 {
 		panic("boundsAround called with zero Surfaces")
 	}
-	for i, s := range ss {
-		if i == 0 {
-			b = s.Bounds(t0, t1)
-			continue
-		}
-		b = b.Plus(s.Bounds(t0, t1))
+	for _, s := range ss {
+		b = s.Bounds(t0, t1).Plus(b)
 	}
 	return
 }

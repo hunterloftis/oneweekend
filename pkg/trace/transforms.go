@@ -25,7 +25,7 @@ func (t *Translate) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	return hit
 }
 
-func (t *Translate) Bounds(t0, t1 float64) AABB {
+func (t *Translate) Bounds(t0, t1 float64) *AABB {
 	b := t.child.Bounds(t0, t1)
 	return NewAABB(b.Min().Plus(t.offset), b.Max().Plus(t.offset))
 }
@@ -33,7 +33,7 @@ func (t *Translate) Bounds(t0, t1 float64) AABB {
 type RotateY struct {
 	child              Surface
 	sinTheta, cosTheta float64
-	bounds             AABB
+	bounds             *AABB
 }
 
 func NewRotateY(child Surface, angle float64) *RotateY {
@@ -61,7 +61,7 @@ func (r *RotateY) Hit(in Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	return hit
 }
 
-func (r *RotateY) Bounds(t0, t1 float64) AABB {
+func (r *RotateY) Bounds(t0, t1 float64) *AABB {
 	return r.bounds
 }
 

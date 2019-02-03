@@ -14,7 +14,7 @@ const bias = 0.001
 // Surface is a bounded object in 3D space that can be hit by a Ray.
 type Surface interface {
 	Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit
-	Bounds(t0, t1 float64) (bounds AABB)
+	Bounds(t0, t1 float64) (bounds *AABB)
 }
 
 // Material determines how light scatters and emits when it hits a Surface.
@@ -38,13 +38,13 @@ type AABB struct {
 	max geom.Vec
 }
 
-// NewAABB creates a new AABB with the given min and max positions.
-func NewAABB(min, max geom.Vec) AABB {
-	return AABB{min: min.Min(max), max: max.Max(min)}
+// NewAABB creates a new *AABB with the given min and max positions.
+func NewAABB(min, max geom.Vec) *AABB {
+	return &AABB{min: min.Min(max), max: max.Max(min)}
 }
 
-// Hit returns whether or not a given ray hits the AABB between dMin and dMax distances
-func (a AABB) Hit(r Ray, dMin, dMax float64) bool {
+// Hit returns whether or not a given ray hits the *AABB between dMin and dMax distances
+func (a *AABB) Hit(r Ray, dMin, dMax float64) bool {
 	for i := 0; i < 3; i++ {
 		invD := 1 / r.Dir.E[i]
 		d0 := (a.min.E[i] - r.Or.E[i]) * invD
@@ -65,14 +65,17 @@ func (a AABB) Hit(r Ray, dMin, dMax float64) bool {
 	return true
 }
 
-// Plus returns a new AABB that encompasses the space of both a and b.
-// If b is nil, the new AABB will be equivalent to a.
-func (a AABB) Plus(b AABB) AABB {
+// Plus returns a new *AABB that encompasses the space of both a and b.
+// If b is nil, the new *AABB will be equivalent to a.
+func (a *AABB) Plus(b *AABB) *AABB {
+	if b == nil {
+		return NewAABB(a.min, a.max)
+	}
 	return NewAABB(a.min.Min(b.min), a.max.Max(b.max))
 }
 
 // Corners returns a slice of the eight corners of this bounding box.
-func (a AABB) Corners() []geom.Vec {
+func (a *AABB) Corners() []geom.Vec {
 	c := make([]geom.Vec, 0, 8)
 	for i := 0.0; i < 2; i++ {
 		for j := 0.0; j < 2; j++ {
@@ -88,21 +91,21 @@ func (a AABB) Corners() []geom.Vec {
 }
 
 // Extended returns a new bounding box that encloses Vector v.
-func (a AABB) Extended(v geom.Vec) AABB {
+func (a *AABB) Extended(v geom.Vec) *AABB {
 	return NewAABB(a.min.Min(v), a.max.Max(v))
 }
 
-// Min returns the minimum AABB vector.
-func (a AABB) Min() geom.Vec {
+// Min returns the minimum *AABB vector.
+func (a *AABB) Min() geom.Vec {
 	return a.min
 }
 
-// Max returns the maximum AABB vector.
-func (a AABB) Max() geom.Vec {
+// Max returns the maximum *AABB vector.
+func (a *AABB) Max() geom.Vec {
 	return a.max
 }
 
-func (a AABB) SurfaceArea() float64 {
+func (a *AABB) SurfaceArea() float64 {
 	dims := a.max.Minus(a.min)
 	front := dims.X() * dims.Y()
 	side := dims.Z() * dims.Y()
@@ -110,6 +113,6 @@ func (a AABB) SurfaceArea() float64 {
 	return (front + side + top) * 2
 }
 
-func (a AABB) Mid() geom.Vec {
+func (a *AABB) Mid() geom.Vec {
 	return a.min.Plus(a.max).Scaled(0.5)
 }
