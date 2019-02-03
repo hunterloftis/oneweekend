@@ -69,7 +69,7 @@ func (s *Sphere) Center(t float64) geom.Vec {
 }
 
 // Bounds returns the Axis-Aligned Bounding Bounds of the sphere encompassing all times between t0 and t1
-func (s *Sphere) Bounds(t0, t1 float64) *AABB {
+func (s *Sphere) Bounds(t0, t1 float64) AABB {
 	bounds0 := NewAABB(
 		s.Center(t0).Minus(geom.NewVec(s.rad, s.rad, s.rad)),
 		s.Center(t0).Plus(geom.NewVec(s.rad, s.rad, s.rad)),
@@ -146,7 +146,7 @@ func (r *Rect) Hit(in Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 }
 
 // Bounds returns the axis Aligned Bounding Box encompassing the Rect.
-func (r *Rect) Bounds(t0, t1 float64) *AABB {
+func (r *Rect) Bounds(t0, t1 float64) AABB {
 	bias := geom.NewVec(0, 0, 0)
 	bias.E[r.axis] = 0.001
 	return NewAABB(r.min.Minus(bias), r.max.Plus(bias))

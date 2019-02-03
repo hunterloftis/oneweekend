@@ -77,9 +77,7 @@ func (wi Window) WritePPM(w io.Writer, cam Camera, s Surface, samples int) error
 	}
 	close(jobs)
 	for y := 0; y < wi.height; y++ {
-		// fmt.Fprintln(os.Stderr, "waiting for results...")
 		r := <-results
-		// fmt.Fprintln(os.Stderr, "got results for", r.row)
 		pending[r.row] = r.pixels
 		for pending[cursor] != "" {
 			fmt.Fprint(w, pending[cursor])

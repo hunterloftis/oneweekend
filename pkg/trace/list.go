@@ -32,12 +32,9 @@ func (l *List) Add(ss ...Surface) int {
 
 // Bounds returns the Axis Aligned Bounding Box encompassing all listed HitBounders
 // between times t0 and t1
-func (l *List) Bounds(t0, t1 float64) (bounds *AABB) {
+func (l *List) Bounds(t0, t1 float64) (bounds AABB) {
 	for _, h := range l.ss {
 		bounds = h.Bounds(t0, t1).Plus(bounds)
-	}
-	if bounds == nil {
-		panic("No Bounds defined")
 	}
 	return
 }

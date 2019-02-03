@@ -53,6 +53,6 @@ func (v *Volume) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	}
 }
 
-func (v *Volume) Bounds(t0, t1 float64) *AABB {
+func (v *Volume) Bounds(t0, t1 float64) AABB {
 	return v.boundary.Bounds(t0, t1)
 }

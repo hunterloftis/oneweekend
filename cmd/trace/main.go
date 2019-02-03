@@ -18,7 +18,7 @@ func main() {
 	}
 	w := trace.NewWindow(500, 500)
 	cam, scene := final(w.Aspect())
-	if err := w.WritePPM(os.Stdout, cam, scene, 500); err != nil {
+	if err := w.WritePPM(os.Stdout, cam, scene, 100); err != nil {
 		panic(err)
 	}
 }
@@ -72,7 +72,7 @@ func final(aspect float64) (trace.Camera, *trace.List) {
 	boxList2 := trace.NewList()
 	white := trace.NewLambert(trace.NewUniform(0.73, 0.73, 0.73))
 	ground := trace.NewLambert(trace.NewUniform(0.48, 0.83, 0.53))
-	light := trace.NewLight(trace.NewUniform(2, 2, 2))
+	light := trace.NewLight(trace.NewUniform(7, 7, 7))
 	for i := 0; i < nb; i++ {
 		for j := 0; j < nb; j++ {
 			min := geom.NewVec(-1000+float64(i)*w, 0, -1000+float64(j)*w)
