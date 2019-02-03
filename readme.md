@@ -4,12 +4,12 @@ This is a chapter-by-chapter progression through the excellent
 free [ray-tracing books](https://drive.google.com/drive/folders/14yayBb9XiL16lmuhbYhhvea8mKUUK77W)
 by Peter Shirley:
 
-- [Ray Tracing in One Weekend](https://github.com/hunterloftis/oneweekend/tree/master#ray-tracing-in-one-weekend)
-- [Ray Tracing: the Next Week](https://github.com/hunterloftis/oneweekend/tree/nextweek#ray-tracing-the-next-week)
+- [Ray Tracing in One Weekend](https://github.com/hunterloftis/oneweekend/tree/oneweekend#ray-tracing-in-one-weekend)
+- [Ray Tracing: the Next Week](https://github.com/hunterloftis/oneweekend/tree/master#ray-tracing-the-next-week)
 
-The [master](https://github.com/hunterloftis/oneweekend/tree/master)
+The [oneweekend](https://github.com/hunterloftis/oneweekend/tree/oneweekend)
 branch goes through the first book and
-the [nextweek](https://github.com/hunterloftis/oneweekend/tree/nextweek)
+the [master](https://github.com/hunterloftis/oneweekend/tree/master)
 branch continues through the second.
 
 ## Ray Tracing in One Weekend
@@ -17,6 +17,7 @@ branch continues through the second.
 ```bash
 $ git clone https://github.com/hunterloftis/oneweekend.git
 $ cd oneweekend
+$ git checkout oneweekend
 $ go build ./cmd/trace
 $ ./trace > cover.ppm && open cover.ppm
 ```
@@ -28,7 +29,6 @@ $ ./trace > cover.ppm && open cover.ppm
 ```bash
 $ git clone https://github.com/hunterloftis/oneweekend.git
 $ cd oneweekend
-$ git checkout nextweek
 $ go build ./cmd/trace
 $ ./trace > cover.ppm && open cover.ppm
 ```
