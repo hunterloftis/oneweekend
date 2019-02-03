@@ -1,6 +1,6 @@
-# Ray Tracing in Golang
+# Ray Tracing in Go
 
-This is a [chapter-by-chapter progression](https://github.com/hunterloftis/oneweekend/releases) through the excellent
+This is a chapter-by-chapter progression through the excellent
 free [ray-tracing books](https://drive.google.com/drive/folders/14yayBb9XiL16lmuhbYhhvea8mKUUK77W)
 by Peter Shirley:
 
@@ -9,8 +9,18 @@ by Peter Shirley:
 
 [![GoDoc](https://godoc.org/github.com/hunterloftis/oneweekend/oneweekend?status.svg)](https://godoc.org/github.com/hunterloftis/oneweekend)
 
-There are [tags at each chapter](https://github.com/hunterloftis/oneweekend/releases)
-and [commits at each checkpoint](https://github.com/hunterloftis/oneweekend/commits/master) within chapters.
+## Who is this for?
+
+If you're interested in graphics and ray tracing,
+this is a working example of a simple, easy-to-read ray tracer written in Go.
+It is built up piece-by-piece in concert with the chapters of the
+[original C++ books](https://drive.google.com/drive/folders/14yayBb9XiL16lmuhbYhhvea8mKUUK77W)
+by Peter Shirley.
+
+If you're interested in Go,
+this is a fun, visual way to explore the language.
+It's [fully documented](https://godoc.org/github.com/hunterloftis/oneweekend)
+and easy to change in order to create your own ray traced images.
 
 ## Ray Tracing in One Weekend
 
