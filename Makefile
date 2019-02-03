@@ -1,6 +1,6 @@
 test:
-	go run cmd/trace/main.go > test.ppm
-	open test.ppm
+	go build ./cmd/trace
+	time --format="%e seconds" ./trace > test.ppm
 
 doc:
 	mkdir -p /tmp/goroot/doc
@@ -13,11 +13,5 @@ doc:
 profile:
 	go build ./cmd/trace
 	./trace -profile > test.ppm
-	@echo 'Next, go tool pprof --pdf ./trace /tmp/path/to/cpu.pprof > cpu.pdf'
+	go tool pprof --pdf ./trace ./cpu.pprof > cpu.pdf && open cpu.pdf
 
-profwin:
-	PATH %PATH%;C:\Program Files (x86)\Graphviz2.38\bin
-	go build ./cmd/trace
-	trace.exe -profile > test.ppm
-	go tool pprof --pdf ./trace.exe C:\path\to\cpu.pprof > cpu.pdf
-	start cpu.pdf

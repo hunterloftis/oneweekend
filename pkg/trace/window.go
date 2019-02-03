@@ -5,91 +5,151 @@ import (
 	"io"
 	"math"
 	"math/rand"
+	"runtime"
+	"strings"
+	"time"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
-const bias = 0.001
-
-// Hitter represents something that can be Hit by a Ray.
-type Hitter interface {
-	Hit(r geom.Ray, tMin, tMax float64) (t float64, s Bouncer)
-}
-
-// Bouncer represents something that can return Bounce normals and materials
-type Bouncer interface {
-	Bounce(p geom.Vec) (n geom.Unit, m Material)
-}
-
-// Material represents a material that scatters light.
-type Material interface {
-	Scatter(in geom.Unit, n geom.Unit) (out geom.Unit, attenuation Color, ok bool)
-}
-
-// Window gathers the results of ray traces on a W x H grid.
+// Window gathers the results of ray traces in a width x height grid.
 type Window struct {
-	W, H int
+	width, height int
 }
 
-// NewWindow creates a new Window with specific dimensions
-func NewWindow(width, height int) Window {
-	return Window{W: width, H: height}
+// NewWindow creates a new Window with dimensions width x height.
+func NewWindow(width, height int) *Window {
+	return &Window{width: width, height: height}
 }
 
-// WritePPM traces each pixel in the Window and writes the results to w in PPM format
-func (wi Window) WritePPM(w io.Writer, h Hitter, samples int) error {
+// Aspect returns the aspect ratio of the window's width / height.
+func (wi *Window) Aspect() float64 {
+	return float64(wi.width) / float64(wi.height)
+}
+
+type result struct {
+	row    int
+	pixels string
+}
+
+// WritePPM traces each pixel in the Window and writes the results to w in PPM format.
+func (wi Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
-	if _, err := fmt.Fprintln(w, wi.W, wi.H); err != nil {
+	if _, err := fmt.Fprintln(w, wi.width, wi.height); err != nil {
 		return err
 	}
 	if _, err := fmt.Fprintln(w, "255"); err != nil {
 		return err
 	}
 
-	from := geom.NewVec(13, 2, 3)
-	at := geom.NewVec(0, 0, 0)
-	focus := 10.0
-	cam := NewCamera(from, at, geom.NewUnit(0, 1, 0), 20, float64(wi.W)/float64(wi.H), 0.1, focus)
-
-	for y := wi.H - 1; y >= 0; y-- {
-		for x := 0; x < wi.W; x++ {
-			c := NewColor(0, 0, 0)
-			for s := 0; s < samples; s++ {
-				u := (float64(x) + rand.Float64()) / float64(wi.W)
-				v := (float64(y) + rand.Float64()) / float64(wi.H)
-				r := cam.Ray(u, v)
-				c = c.Plus(color(r, h, 0))
+	worker := func(jobs <-chan int, results chan<- result, rnd *rand.Rand) {
+		for y := range jobs {
+			var px strings.Builder
+			for x := 0; x < wi.width; x++ {
+				c := black
+				for n := 0; n < samples; n++ {
+					u := (float64(x) + rnd.Float64()) / float64(wi.width)
+					v := 1 - (float64(y)+rnd.Float64())/float64(wi.height)
+					r := cam.Ray(u, v, rnd)
+					c = c.Plus(color(r, s, 0, rnd))
+				}
+				c = c.Scaled(1 / float64(samples)).Gamma(2)
+				ir := int(math.Min(255, 255.99*c.R()))
+				ig := int(math.Min(255, 255.99*c.G()))
+				ib := int(math.Min(255, 255.99*c.B()))
+				fmt.Fprintln(&px, ir, ig, ib)
 			}
-			c = c.Scaled(1 / float64(samples)).Gamma(2)
-			ir := int(255.99 * c.R())
-			ig := int(255.99 * c.G())
-			ib := int(255.99 * c.B())
-			if _, err := fmt.Fprintln(w, ir, ig, ib); err != nil {
-				return err
-			}
+			results <- result{row: y, pixels: px.String()}
 		}
 	}
+
+	workers := runtime.NumCPU() + 1
+	jobs := make(chan int, wi.height)
+	results := make(chan result, workers+1)
+	pending := make(map[int]string, 0)
+	cursor := 0
+
+	for w := 0; w < workers; w++ {
+		go worker(jobs, results, rand.New(rand.NewSource(time.Now().Unix())))
+	}
+	for y := 0; y < wi.height; y++ {
+		jobs <- y
+	}
+	close(jobs)
+	for y := 0; y < wi.height; y++ {
+		r := <-results
+		pending[r.row] = r.pixels
+		for pending[cursor] != "" {
+			fmt.Fprint(w, pending[cursor])
+			delete(pending, cursor)
+			cursor++
+		}
+	}
+
 	return nil
 }
 
-func color(r geom.Ray, h Hitter, depth int) Color {
-	if depth > 9 {
-		return NewColor(0, 0, 0)
+func color(r Ray, h Surface, depth int, rnd *rand.Rand) Color {
+	if depth > 50 {
+		return black
 	}
-	if t, b := h.Hit(r, bias, math.MaxFloat64); t > 0 {
-		p := r.At(t)
-		n, m := b.Bounce(p)
-		scattered, attenuation, ok := m.Scatter(r.Dir, n)
+	if hit := h.Hit(r, bias, math.MaxFloat64, rnd); hit != nil {
+		emit := hit.Mat.Emit(hit.UV, hit.Pt)
+		out, attenuate, ok := hit.Mat.Scatter(r.Dir, hit.Norm, hit.UV, hit.Pt, rnd)
 		if !ok {
-			return NewColor(0, 0, 0)
+			return emit
 		}
-		r2 := geom.NewRay(p, scattered)
-		return color(r2, h, depth+1).Times(attenuation)
+		indirect := color(NewRay(hit.Pt, out, r.T), h, depth+1, rnd).Times(attenuate)
+		return emit.Plus(indirect)
 	}
-	t := 0.5 * (r.Dir.Y() + 1.0)
-	white := NewColor(1, 1, 1).Scaled(1 - t)
-	blue := NewColor(0.5, 0.7, 1).Scaled(t)
-	return white.Plus(blue)
+	return black
+}
+
+// Camera generates rays from a given point of view.
+type Camera struct {
+	lowerLeft    geom.Vec
+	horizontal   geom.Vec
+	vertical     geom.Vec
+	origin       geom.Vec
+	u, v, w      geom.Unit
+	lensRadius   float64
+	time0, time1 float64
+}
+
+// NewCamera returns a new Camera.
+// TODO: this argument list is getting pretty ridiculous
+func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture, focus, t0, t1 float64) *Camera {
+	theta := vfov * math.Pi / 180
+	halfH := math.Tan(theta / 2)
+	halfW := aspect * halfH
+
+	c := Camera{}
+	c.w = lookFrom.Minus(lookAt).Unit()
+	c.u = geom.Vec(vup).Cross(geom.Vec(c.w)).Unit()
+	c.v = geom.Vec(c.w).Cross(geom.Vec(c.u)).Unit()
+
+	width := c.u.Scaled(halfW * focus)
+	height := c.v.Scaled(halfH * focus)
+	dist := c.w.Scaled(focus)
+
+	c.time0 = t0
+	c.time1 = t1
+	c.lensRadius = aperture / 2
+	c.origin = lookFrom
+	c.lowerLeft = c.origin.Minus(width).Minus(height).Minus(dist)
+	c.horizontal = width.Scaled(2)
+	c.vertical = height.Scaled(2)
+	return &c
+}
+
+// Ray returns a ray from this camera passing through a given s, t coordinate.
+func (c *Camera) Ray(s, t float64, rnd *rand.Rand) Ray {
+	rd := geom.RandVecInDisk(rnd).Scaled(c.lensRadius)
+	offset := c.u.Scaled(rd.X()).Plus(c.v.Scaled(rd.Y()))
+	source := c.origin.Plus(offset)
+	dest := c.lowerLeft.Plus(c.horizontal.Scaled(s).Plus(c.vertical.Scaled(t)))
+	time := c.time0 + (c.time1-c.time0)*rnd.Float64()
+	return NewRay(source, dest.Minus(source).Unit(), time)
 }

@@ -1,31 +1,45 @@
 package trace
 
-import "github.com/hunterloftis/oneweekend/pkg/geom"
+import "math/rand"
 
-// List holds a list of Surfaces
+// List contains a list of surfaces.
 type List struct {
-	HH []Hitter
+	ss []Surface
 }
 
-// NewList creates a new list of Hitters
-func NewList(h ...Hitter) *List {
-	return &List{HH: h}
+// NewList creates a new list containing ss.
+func NewList(ss ...Surface) *List {
+	return &List{ss: ss}
 }
 
-// Hit finds the first intersection (if any) between Ray r and any of the Hitters in the List.
-// If no intersection is found, t = 0.
-func (l *List) Hit(r geom.Ray, tMin, tMax float64) (t float64, b Bouncer) {
-	closest := tMax
-	for _, h := range l.HH {
-		if ht, hb := h.Hit(r, tMin, closest); ht > 0 {
-			closest, t = ht, ht
-			b = hb
+// Hit returns details of the intersection between r and this surface.
+// If r does not intersect with this BVH, it returns nil.
+func (l *List) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) (nearest *Hit) {
+	for _, h := range l.ss {
+		if hit := h.Hit(r, dMin, dMax, rnd); hit != nil {
+			dMax = hit.Dist
+			nearest = hit
 		}
 	}
 	return
 }
 
-func (l *List) Add(h ...Hitter) int {
-	l.HH = append(l.HH, h...)
-	return len(l.HH)
+// Add adds new surfaces to the list.
+func (l *List) Add(ss ...Surface) int {
+	l.ss = append(l.ss, ss...)
+	return len(l.ss)
+}
+
+// Bounds returns an axis-aligned bounding box that encloses
+// all of the contained surfaces from time t0 to t1.
+func (l *List) Bounds(t0, t1 float64) (bounds *AABB) {
+	for _, h := range l.ss {
+		bounds = h.Bounds(t0, t1).Plus(bounds)
+	}
+	return
+}
+
+// Surfaces returns all the surfaces the list contains.
+func (l *List) Surfaces() []Surface {
+	return l.ss
 }
