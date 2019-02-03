@@ -12,6 +12,11 @@ import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
+type result struct {
+	row    int
+	pixels string
+}
+
 // Window gathers the results of ray traces in a width x height grid.
 type Window struct {
 	width, height int
@@ -27,13 +32,8 @@ func (wi *Window) Aspect() float64 {
 	return float64(wi.width) / float64(wi.height)
 }
 
-type result struct {
-	row    int
-	pixels string
-}
-
 // WritePPM traces each pixel in the Window and writes the results to w in PPM format.
-func (wi Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) error {
+func (wi *Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
