@@ -12,16 +12,17 @@ import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
-// Window gathers the results of ray traces on a width x height grid.
+// Window gathers the results of ray traces in a width x height grid.
 type Window struct {
 	width, height int
 }
 
-// NewWindow creates a new Window with specific dimensions
+// NewWindow creates a new Window with dimensions width x height.
 func NewWindow(width, height int) *Window {
 	return &Window{width: width, height: height}
 }
 
+// Aspect returns the aspect ratio of the window's width / height.
 func (wi *Window) Aspect() float64 {
 	return float64(wi.width) / float64(wi.height)
 }
@@ -31,7 +32,7 @@ type result struct {
 	pixels string
 }
 
-// WritePPM traces each pixel in the Window and writes the results to w in PPM format
+// WritePPM traces each pixel in the Window and writes the results to w in PPM format.
 func (wi Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
@@ -106,7 +107,7 @@ func color(r Ray, h Surface, depth int, rnd *rand.Rand) Color {
 	return black
 }
 
-// Camera originates Rays.
+// Camera generates rays from a given point of view.
 type Camera struct {
 	lowerLeft    geom.Vec
 	horizontal   geom.Vec
@@ -117,7 +118,7 @@ type Camera struct {
 	time0, time1 float64
 }
 
-// NewCamera creates a new Camera
+// NewCamera returns a new Camera.
 // TODO: this argument list is getting pretty ridiculous
 func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture, focus, t0, t1 float64) *Camera {
 	theta := vfov * math.Pi / 180
@@ -143,7 +144,7 @@ func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture,
 	return &c
 }
 
-// Ray returns a Ray passing through a given s, t coordinate.
+// Ray returns a ray from this camera passing through a given s, t coordinate.
 func (c *Camera) Ray(s, t float64, rnd *rand.Rand) Ray {
 	rd := geom.RandVecInDisk(rnd).Scaled(c.lensRadius)
 	offset := c.u.Scaled(rd.X()).Plus(c.v.Scaled(rd.Y()))

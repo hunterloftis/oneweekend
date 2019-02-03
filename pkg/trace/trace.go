@@ -1,4 +1,17 @@
-// Package trace renders 3D scenes into 2D images by CPU ray-tracing.
+/*
+Package trace renders 3D scenes into 2D images by CPU ray-tracing.
+
+Basics
+
+A render requires just four things: a window, a surface, a camera, and materials.
+
+The window defines the render's dimensions and outputs the image.
+The surface is the scene that rays are traced against.
+The camera determines your point of view and projects rays at the surface.
+
+Most renders will need at least two materials -
+one to emit light, and one to scatter or reflect light.
+*/
 package trace
 
 import (
@@ -32,18 +45,18 @@ type Hit struct {
 	Mat  Material
 }
 
-// AABB Represents an axis-aligned bounding box.
+// AABB is an axis-aligned bounding box.
 type AABB struct {
 	min geom.Vec
 	max geom.Vec
 }
 
-// NewAABB creates a new *AABB with the given min and max positions.
+// NewAABB creates a new axis-aligned bounding box with the given min and max points.
 func NewAABB(min, max geom.Vec) *AABB {
 	return &AABB{min: min.Min(max), max: max.Max(min)}
 }
 
-// Hit returns whether or not a given ray hits the *AABB between dMin and dMax distances
+// Hit returns whether or not r hits the box between distances dMin and dMax.
 func (a *AABB) Hit(r Ray, dMin, dMax float64) bool {
 	for i := 0; i < 3; i++ {
 		invD := 1 / r.Dir[i]
@@ -65,8 +78,8 @@ func (a *AABB) Hit(r Ray, dMin, dMax float64) bool {
 	return true
 }
 
-// Plus returns a new *AABB that encompasses the space of both a and b.
-// If b is nil, the new *AABB will be equivalent to a.
+// Plus returns a new bounding box that encloses both this box and b.
+// If b is nil, the new box will be equivalent to this box.
 func (a *AABB) Plus(b *AABB) *AABB {
 	if b == nil {
 		return NewAABB(a.min, a.max)
@@ -74,7 +87,7 @@ func (a *AABB) Plus(b *AABB) *AABB {
 	return NewAABB(a.min.Min(b.min), a.max.Max(b.max))
 }
 
-// Corners returns a slice of the eight corners of this bounding box.
+// Corners returns the eight corners of this bounding box.
 func (a *AABB) Corners() []geom.Vec {
 	c := make([]geom.Vec, 0, 8)
 	for i := 0.0; i < 2; i++ {
@@ -90,21 +103,22 @@ func (a *AABB) Corners() []geom.Vec {
 	return c
 }
 
-// Extended returns a new bounding box that encloses Vector v.
+// Extended returns an extended bounding box that also encloses v.
 func (a *AABB) Extended(v geom.Vec) *AABB {
 	return NewAABB(a.min.Min(v), a.max.Max(v))
 }
 
-// Min returns the minimum *AABB vector.
+// Min returns the minimum corner of this bounding box.
 func (a *AABB) Min() geom.Vec {
 	return a.min
 }
 
-// Max returns the maximum *AABB vector.
+// Max returns the maximum corner of this bounding box.
 func (a *AABB) Max() geom.Vec {
 	return a.max
 }
 
+// SurfaceArea returns the total surface area of this bounding box.
 func (a *AABB) SurfaceArea() float64 {
 	dims := a.max.Minus(a.min)
 	front := dims.X() * dims.Y()
@@ -113,6 +127,7 @@ func (a *AABB) SurfaceArea() float64 {
 	return (front + side + top) * 2
 }
 
+// Mid returns the mid-point of this bounding box.
 func (a *AABB) Mid() geom.Vec {
 	return a.min.Plus(a.max).Scaled(0.5)
 }

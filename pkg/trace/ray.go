@@ -2,14 +2,14 @@ package trace
 
 import "github.com/hunterloftis/oneweekend/pkg/geom"
 
-// Ray represents a light ray that exists both in space and in time
+// Ray is a light ray with an origin, direction, and time.
 type Ray struct {
 	Or  geom.Vec
 	Dir geom.Unit
 	T   float64
 }
 
-// NewRay creates a new ray given an origin, direction, and point in time
+// NewRay returns a new ray with an origin, direction, and point in time.
 func NewRay(origin geom.Vec, direction geom.Unit, time float64) Ray {
 	return Ray{
 		Or:  origin,

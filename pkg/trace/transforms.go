@@ -7,15 +7,19 @@ import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
+// Translate is a surface that translates a child surface.
 type Translate struct {
 	child  Surface
 	offset geom.Vec
 }
 
+// NewTranslate returns a new surface that translates child by offset.
 func NewTranslate(child Surface, offset geom.Vec) *Translate {
 	return &Translate{child: child, offset: offset}
 }
 
+// Hit returns details of the intersection between r and this surface.
+// If r does not intersect with this surface, it returns nil.
 func (t *Translate) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	r2 := NewRay(r.Or.Minus(t.offset), r.Dir, r.T)
 	hit := t.child.Hit(r2, dMin, dMax, rnd)
@@ -25,17 +29,21 @@ func (t *Translate) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	return hit
 }
 
+// Bounds returns an axis-aligned bounding box that encloses
+// this surface from time t0 to t1.
 func (t *Translate) Bounds(t0, t1 float64) *AABB {
 	b := t.child.Bounds(t0, t1)
 	return NewAABB(b.Min().Plus(t.offset), b.Max().Plus(t.offset))
 }
 
+// RotateY is a surface that rotates a child surface on the Y axis.
 type RotateY struct {
 	child              Surface
 	sinTheta, cosTheta float64
 	bounds             *AABB
 }
 
+// NewRotateY returns a new surface that rotates child by angle on the Y axis.
 func NewRotateY(child Surface, angle float64) *RotateY {
 	rads := angle * math.Pi / 180
 	r := RotateY{
@@ -51,6 +59,8 @@ func NewRotateY(child Surface, angle float64) *RotateY {
 	return &r
 }
 
+// Hit returns details of the intersection between r and this surface.
+// If r does not intersect with this surface, it returns nil.
 func (r *RotateY) Hit(in Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	in2 := NewRay(r.left(in.Or), geom.Unit(r.left(geom.Vec(in.Dir))), in.T)
 	hit := r.child.Hit(in2, dMin, dMax, rnd)
@@ -61,6 +71,8 @@ func (r *RotateY) Hit(in Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	return hit
 }
 
+// Bounds returns an axis-aligned bounding box that encloses
+// this surface from time t0 to t1.
 func (r *RotateY) Bounds(t0, t1 float64) *AABB {
 	return r.bounds
 }
@@ -77,19 +89,19 @@ func (r *RotateY) left(dir geom.Vec) geom.Vec {
 	return geom.Vec{x, dir.Y(), z}
 }
 
-// Flip overrides the Bounce method of a Surface to invert surface normals.
+// Flip is a surface that inverts the normals of a child surface.
 type Flip struct {
 	Surface
 }
 
-// NewFlip creates a new Flip instance.
+// NewFlip returns a new surface that inverts the normals of child.
 func NewFlip(child Surface) *Flip {
 	return &Flip{Surface: child}
 }
 
-// Hit finds the distnace to the first intersection (if any) between Ray in and the child Surface.
-// If no intersection is found, d = 0.
-// Instead of returning the child, it returns the Flip instance as the Bouncer target.
+// Hit returns details of the intersection between r and this surface.
+// If r does not intersect with this surface, it returns nil.
+// It modifies the Hit record by inverting the normals of the original intersection.
 func (f *Flip) Hit(in Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	hit := f.Surface.Hit(in, dMin, dMax, rnd)
 	if hit != nil {

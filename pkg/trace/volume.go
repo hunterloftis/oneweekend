@@ -7,12 +7,18 @@ import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
+// Volume is a volumetric surface.
+// It can intersect with rays not only on its surface boundary, but also within its enclosing volume.
+// Fog and smoke are volumetric surfaces.
 type Volume struct {
 	boundary Surface
 	density  float64
 	phase    Material
 }
 
+// NewVolume returns a new volumetric surface with a boundary, density, and material.
+// Most materials are not designed for use with volumetric surfaces,
+// so usually phase will be Isotropic.
 func NewVolume(boundary Surface, density float64, phase Material) *Volume {
 	return &Volume{
 		boundary: boundary,
@@ -21,6 +27,10 @@ func NewVolume(boundary Surface, density float64, phase Material) *Volume {
 	}
 }
 
+// Hit returns details of the intersection between r and this volume.
+// If r does not intersect, it returns nil.
+// Intersections are not deterministic for volumes, and it will hit or not,
+// and at various distances, based on the volume's density and a random factor.
 func (v *Volume) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	hit1 := v.boundary.Hit(r, -math.MaxFloat64, math.MaxFloat64, rnd)
 	if hit1 == nil {
@@ -53,6 +63,8 @@ func (v *Volume) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	}
 }
 
+// Bounds returns an axis-aligned bounding box that encloses
+// this volume from time t0 to t1.
 func (v *Volume) Bounds(t0, t1 float64) *AABB {
 	return v.boundary.Bounds(t0, t1)
 }

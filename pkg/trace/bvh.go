@@ -9,14 +9,16 @@ import (
 const costTraverse = 1
 const costIntersect = 2
 
-// BVH represents a bounding volume hierarchy
+// BVH is a surface that contains other surfaces
+// and organizes them into a bounding volume hierarchy.
+// This improves performance of the Hit() function over simple lists for most sets of surfaces.
 type BVH struct {
 	left, right *BVH
 	leaf        Surface
 	bounds      *AABB
 }
 
-// NewBVH creates a new BVH representing Surfaces given as h between times time0 and time1.
+// NewBVH builds a new BVH containing surfaces in ss between times time0 and time1.
 func NewBVH(time0, time1 float64, ss ...Surface) *BVH {
 	return newBVHNode(0, time0, time1, ss...)
 }
@@ -52,9 +54,8 @@ func newBVHNode(depth int, time0, time1 float64, ss ...Surface) *BVH {
 	return &b
 }
 
-// Hit returns the distance d at which Ray r hits this BVH.
-// If the Ray does not intersect with this BVH, d = 0.
-// The returned Bouncer describes the ray's bouncing at this hit point.
+// Hit returns details of the intersection between r and this surface.
+// If r does not intersect with this BVH, it returns nil.
 func (b *BVH) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	if !b.bounds.Hit(r, dMin, dMax) {
 		return nil
@@ -79,8 +80,8 @@ func (b *BVH) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	return nil
 }
 
-// Bounds returns a reference to an *AABB encompassing the space of
-// every Surface in this BVH from time t0 to t1.
+// Bounds returns an axis-aligned bounding box that encloses
+// all of the contained surfaces from time t0 to t1.
 func (b *BVH) Bounds(t0, t1 float64) *AABB {
 	return b.bounds
 }

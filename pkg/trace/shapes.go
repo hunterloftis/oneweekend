@@ -7,7 +7,7 @@ import (
 	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
-// Sphere represents a spherical Surface
+// Sphere is a spherical surface.
 type Sphere struct {
 	center0, center1 geom.Vec
 	t0, t1           float64
@@ -15,12 +15,12 @@ type Sphere struct {
 	mat              Material
 }
 
-// NewSphere creates a new Sphere with the given center and radius.
+// NewSphere creates a new sphere with the given center and radius.
 func NewSphere(center geom.Vec, radius float64, m Material) *Sphere {
 	return NewMovingSphere(center, center, 0, 1, radius, m)
 }
 
-// NewMovingSphere creates a new Sphere with two centers separated by times t0 and t1
+// NewMovingSphere creates a new sphere that moves from center0 at time t0 to center1 at time t1.
 func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m Material) *Sphere {
 	return &Sphere{
 		center0: center0,
@@ -32,8 +32,8 @@ func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m Materi
 	}
 }
 
-// Hit finds the distance to the first intersection (if any) between Ray r and the Sphere's surface.
-// If no intersection is found, d = 0.
+// Hit returns details of the intersection between r and this surface.
+// If r does not intersect with this BVH, it returns nil.
 func (s *Sphere) Hit(r Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 	oc := r.Or.Minus(s.Center(r.T))
 	a := r.Dir.Dot(r.Dir)
@@ -61,14 +61,15 @@ func (s *Sphere) Hit(r Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 	}
 }
 
-// Center returns the center of the sphere at a given time t
+// Center returns the center of the sphere at time t.
 func (s *Sphere) Center(t float64) geom.Vec {
 	p := (t - s.t0) / (s.t1 - s.t0)
 	offset := s.center1.Minus(s.center0).Scaled(p)
 	return s.center0.Plus(offset)
 }
 
-// Bounds returns the Axis-Aligned Bounding Bounds of the sphere encompassing all times between t0 and t1
+// Bounds returns the axis-aligned bounding box enclosing this sphere
+// between times t0 and t1.
 func (s *Sphere) Bounds(t0, t1 float64) *AABB {
 	bounds0 := NewAABB(
 		s.Center(t0).Minus(geom.Vec{s.rad, s.rad, s.rad}),
@@ -81,7 +82,8 @@ func (s *Sphere) Bounds(t0, t1 float64) *AABB {
 	return bounds0.Plus(bounds1)
 }
 
-// UV returns the u, v spherical-mapped coordinates of this Sphere at point p, time t.
+// UV maps point p at time t to a uv coordinate.
+// The uv coordinate is spherically mapped (lat/lon).
 func (s *Sphere) UV(p geom.Vec, t float64) (uv geom.Vec) {
 	p2 := p.Minus(s.Center(t)).Scaled(1 / s.rad)
 	phi := math.Atan2(p2.Z(), p2.X())
@@ -91,16 +93,15 @@ func (s *Sphere) UV(p geom.Vec, t float64) (uv geom.Vec) {
 	return geom.Vec{u, v, 0}
 }
 
-// Rect represents an axis-aligned rectangle
+// Rect is an axis-aligned rectangular surface.
 type Rect struct {
 	min, max geom.Vec
 	axis     int
 	mat      Material
 }
 
-// NewRect creates a new Rect with the given min and max points and a Material.
-// One axis of min and max should be equal - that's the axis of the plane of the rectangle.
-// Rects default to XY rects (with an axis of Z).
+// NewRect creates a new rectangular surface with material m from points min to max.
+// One axis of min and max must be equal - that's the axis of the plane of the rectangle.
 func NewRect(min, max geom.Vec, m Material) *Rect {
 	r := Rect{
 		min: min,
@@ -116,8 +117,8 @@ func NewRect(min, max geom.Vec, m Material) *Rect {
 	return &r
 }
 
-// Hit finds the distnace to the first intersection (if any) between Ray in and the Rect.
-// If no intersection is found, d = 0.
+// Hit returns details of the intersection between r and this surface.
+// If r does not intersect with this BVH, it returns nil.
 func (r *Rect) Hit(in Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 	a0 := r.axis
 	a1 := (a0 + 1) % 3
@@ -145,17 +146,20 @@ func (r *Rect) Hit(in Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 	}
 }
 
-// Bounds returns the axis Aligned Bounding Box encompassing the Rect.
+// Bounds returns an axis-aligned bounding box that encloses
+// this rect from time t0 to t1.
 func (r *Rect) Bounds(t0, t1 float64) *AABB {
 	bias := geom.Vec{0, 0, 0}
 	bias[r.axis] = 0.001
 	return NewAABB(r.min.Minus(bias), r.max.Plus(bias))
 }
 
+// Box is an axis-aligned surface with six rectangular sides.
 type Box struct {
 	*List
 }
 
+// NewBox returns a new box that encloses the volume between points min and max.
 func NewBox(min, max geom.Vec, m Material) *Box {
 	return &Box{List: NewList(
 		NewRect(geom.Vec{min.X(), min.Y(), max.Z()}, geom.Vec{max.X(), max.Y(), max.Z()}, m),
