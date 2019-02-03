@@ -7,10 +7,7 @@ by Peter Shirley:
 - [Ray Tracing in One Weekend](https://github.com/hunterloftis/oneweekend/tree/oneweekend#ray-tracing-in-one-weekend)
 - [Ray Tracing: the Next Week](https://github.com/hunterloftis/oneweekend/tree/master#ray-tracing-the-next-week)
 
-The [oneweekend](https://github.com/hunterloftis/oneweekend/tree/oneweekend)
-branch goes through the first book and
-the [master](https://github.com/hunterloftis/oneweekend/tree/master)
-branch continues through the second.
+[![GoDoc](https://godoc.org/github.com/hunterloftis/oneweekend/oneweekend?status.svg)](https://godoc.org/github.com/hunterloftis/oneweekend)
 
 ## Ray Tracing in One Weekend
 
