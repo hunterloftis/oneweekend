@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/hunterloftis/oneweekend/pkg/geom"
@@ -44,7 +45,7 @@ func (wi Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) erro
 
 	worker := func(jobs <-chan int, results chan<- result, rnd *rand.Rand) {
 		for y := range jobs {
-			res := result{row: y, pixels: ""}
+			var px strings.Builder
 			for x := 0; x < wi.width; x++ {
 				c := black
 				for n := 0; n < samples; n++ {
@@ -57,9 +58,9 @@ func (wi Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) erro
 				ir := int(math.Min(255, 255.99*c.R()))
 				ig := int(math.Min(255, 255.99*c.G()))
 				ib := int(math.Min(255, 255.99*c.B()))
-				res.pixels += fmt.Sprintln(ir, ig, ib)
+				fmt.Fprintln(&px, ir, ig, ib)
 			}
-			results <- res
+			results <- result{row: y, pixels: px.String()}
 		}
 	}
 
