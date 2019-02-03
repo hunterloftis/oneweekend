@@ -20,12 +20,12 @@ type Dielectric struct {
 }
 
 // NewDielectric creates a new material with the given index of refraction.
-func NewDielectric(iRefract float64) Dielectric {
-	return Dielectric{iRefract: iRefract}
+func NewDielectric(iRefract float64) *Dielectric {
+	return &Dielectric{iRefract: iRefract}
 }
 
 // Scatter reflects or refracts incoming light based on the ratio of indexes of refraction
-func (d Dielectric) Scatter(in, n geom.Unit, _, _ geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
+func (d *Dielectric) Scatter(in, n geom.Unit, _, _ geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
 	var outNormal geom.Unit
 	var ratio float64
 	var cos float64
@@ -84,12 +84,12 @@ type Lambert struct {
 }
 
 // NewLambert creates a new Lambert material with the given color.
-func NewLambert(texture Mapper) Lambert {
-	return Lambert{texture: texture}
+func NewLambert(texture Mapper) *Lambert {
+	return &Lambert{texture: texture}
 }
 
 // Scatter scatters incoming light rays in a hemisphere about the normal.
-func (l Lambert) Scatter(in, n geom.Unit, uv, p geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
+func (l *Lambert) Scatter(in, n geom.Unit, uv, p geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
 	out = geom.Vec(n).Plus(geom.RandVecInSphere(rnd)).Unit()
 	attenuate = l.texture.Map(uv, p)
 	return out, attenuate, true
@@ -119,12 +119,12 @@ type Metal struct {
 }
 
 // NewMetal creates a new Metal material with a given color and roughness.
-func NewMetal(texture Mapper, roughness float64) Metal {
-	return Metal{texture: texture, rough: roughness}
+func NewMetal(texture Mapper, roughness float64) *Metal {
+	return &Metal{texture: texture, rough: roughness}
 }
 
 // Scatter reflects incoming light rays about the normal.
-func (m Metal) Scatter(in, norm geom.Unit, uv, p geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
+func (m *Metal) Scatter(in, norm geom.Unit, uv, p geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
 	r := reflect(in, norm)
 	out = geom.Vec(r).Plus(geom.RandVecInSphere(rnd).Scaled(m.rough)).Unit()
 	return out, m.texture.Map(uv, p), out.Dot(norm) > 0

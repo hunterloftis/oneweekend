@@ -17,11 +17,11 @@ type Window struct {
 }
 
 // NewWindow creates a new Window with specific dimensions
-func NewWindow(width, height int) Window {
-	return Window{width: width, height: height}
+func NewWindow(width, height int) *Window {
+	return &Window{width: width, height: height}
 }
 
-func (wi Window) Aspect() float64 {
+func (wi *Window) Aspect() float64 {
 	return float64(wi.width) / float64(wi.height)
 }
 
@@ -31,7 +31,7 @@ type result struct {
 }
 
 // WritePPM traces each pixel in the Window and writes the results to w in PPM format
-func (wi Window) WritePPM(w io.Writer, cam Camera, s Surface, samples int) error {
+func (wi Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) error {
 	if _, err := fmt.Fprintln(w, "P3"); err != nil {
 		return err
 	}
@@ -118,11 +118,12 @@ type Camera struct {
 
 // NewCamera creates a new Camera
 // TODO: this argument list is getting pretty ridiculous
-func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture, focus, t0, t1 float64) (c Camera) {
+func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture, focus, t0, t1 float64) *Camera {
 	theta := vfov * math.Pi / 180
 	halfH := math.Tan(theta / 2)
 	halfW := aspect * halfH
 
+	c := Camera{}
 	c.w = lookFrom.Minus(lookAt).Unit()
 	c.u = geom.Vec(vup).Cross(geom.Vec(c.w)).Unit()
 	c.v = geom.Vec(c.w).Cross(geom.Vec(c.u)).Unit()
@@ -138,11 +139,11 @@ func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture,
 	c.lowerLeft = c.origin.Minus(width).Minus(height).Minus(dist)
 	c.horizontal = width.Scaled(2)
 	c.vertical = height.Scaled(2)
-	return
+	return &c
 }
 
 // Ray returns a Ray passing through a given s, t coordinate.
-func (c Camera) Ray(s, t float64, rnd *rand.Rand) Ray {
+func (c *Camera) Ray(s, t float64, rnd *rand.Rand) Ray {
 	rd := geom.RandVecInDisk(rnd).Scaled(c.lensRadius)
 	offset := c.u.Scaled(rd.X()).Plus(c.v.Scaled(rd.Y()))
 	source := c.origin.Plus(offset)

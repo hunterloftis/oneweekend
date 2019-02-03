@@ -23,8 +23,8 @@ type Checker struct {
 }
 
 // NewChecker returns a new checkered texture rendering sub-textures t0 and t1 in size squares.
-func NewChecker(size float64, t0, t1 Mapper) Checker {
-	return Checker{
+func NewChecker(size float64, t0, t1 Mapper) *Checker {
+	return &Checker{
 		size: size,
 		odd:  t0,
 		even: t1,
@@ -32,7 +32,7 @@ func NewChecker(size float64, t0, t1 Mapper) Checker {
 }
 
 // Map maps a u, v coordinate in 3d space p to a Color
-func (c Checker) Map(uv, p geom.Vec) Color {
+func (c *Checker) Map(uv, p geom.Vec) Color {
 	sines := math.Sin(c.size*p.X()) * math.Sin(c.size*p.Y()) * math.Sin(c.size*p.Z())
 	if sines < 0 {
 		return c.odd.Map(uv, p)
@@ -46,12 +46,12 @@ type Uniform struct {
 }
 
 // NewUniform returns a new Uniform texture
-func NewUniform(r, g, b float64) Uniform {
-	return Uniform{c: Color{r, g, b}}
+func NewUniform(r, g, b float64) *Uniform {
+	return &Uniform{c: Color{r, g, b}}
 }
 
 // Map maps a u, v coordinate in 3d space p to a Color
-func (u Uniform) Map(uv, p geom.Vec) Color {
+func (u *Uniform) Map(uv, p geom.Vec) Color {
 	return u.c
 }
 
@@ -60,11 +60,11 @@ type Bright struct {
 	scale float64
 }
 
-func NewBright(src Mapper, scale float64) Bright {
-	return Bright{src: src, scale: scale}
+func NewBright(src Mapper, scale float64) *Bright {
+	return &Bright{src: src, scale: scale}
 }
 
-func (b Bright) Map(uv, p geom.Vec) Color {
+func (b *Bright) Map(uv, p geom.Vec) Color {
 	return b.src.Map(uv, p).Scaled(b.scale)
 }
 
@@ -118,12 +118,12 @@ type Noise struct {
 }
 
 // NewNoise returns a new noise texture with frequency scaled by scale
-func NewNoise(scale0, scale1 float64, axis int) Noise {
-	return Noise{scale0: scale0, scale1: scale1, axis: axis}
+func NewNoise(scale0, scale1 float64, axis int) *Noise {
+	return &Noise{scale0: scale0, scale1: scale1, axis: axis}
 }
 
 // Map maps a u, v coordinate in 3d space p to a Color
-func (n Noise) Map(uv, p geom.Vec) Color {
+func (n *Noise) Map(uv, p geom.Vec) Color {
 	bright := 0.5 * (1 + math.Sin(n.scale0*p[n.axis]+10*turb(p.Scaled(n.scale1), 7)))
 	return white.Scaled(bright)
 }

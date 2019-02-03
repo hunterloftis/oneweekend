@@ -153,11 +153,11 @@ func (r *Rect) Bounds(t0, t1 float64) *AABB {
 }
 
 type Box struct {
-	List
+	*List
 }
 
 func NewBox(min, max geom.Vec, m Material) *Box {
-	return &Box{List: *NewList(
+	return &Box{List: NewList(
 		NewRect(geom.Vec{min.X(), min.Y(), max.Z()}, geom.Vec{max.X(), max.Y(), max.Z()}, m),
 		NewFlip(NewRect(geom.Vec{min.X(), min.Y(), min.Z()}, geom.Vec{max.X(), max.Y(), min.Z()}, m)),
 		NewRect(geom.Vec{min.X(), max.Y(), min.Z()}, geom.Vec{max.X(), max.Y(), max.Z()}, m),

@@ -23,7 +23,7 @@ func main() {
 	}
 }
 
-func custom(aspect float64) (trace.Camera, *trace.BVH) {
+func custom(aspect float64) (*trace.Camera, *trace.BVH) {
 	rand.Seed(10)
 	nb := 20
 	w := 100.0
@@ -62,7 +62,7 @@ func custom(aspect float64) (trace.Camera, *trace.BVH) {
 	return cam, trace.NewBVH(0, 1, list.Surfaces()...)
 }
 
-func final(aspect float64) (trace.Camera, *trace.List) {
+func final(aspect float64) (*trace.Camera, *trace.List) {
 	rand.Seed(10)
 	nb := 20
 	w := 100.0
@@ -113,7 +113,7 @@ func final(aspect float64) (trace.Camera, *trace.List) {
 	return cam, list
 }
 
-func cornellSmoke(aspect float64) (trace.Camera, *trace.List) {
+func cornellSmoke(aspect float64) (*trace.Camera, *trace.List) {
 	green := trace.NewLambert(trace.NewUniform(0.12, 0.45, 0.15))
 	red := trace.NewLambert(trace.NewUniform(0.65, 0.05, 0.05))
 	light := trace.NewLight(trace.NewUniform(7, 7, 7))
@@ -138,7 +138,7 @@ func cornellSmoke(aspect float64) (trace.Camera, *trace.List) {
 	)
 }
 
-func cornell(aspect float64) (trace.Camera, *trace.List) {
+func cornell(aspect float64) (*trace.Camera, *trace.List) {
 	green := trace.NewLambert(trace.NewUniform(0.12, 0.45, 0.15))
 	red := trace.NewLambert(trace.NewUniform(0.65, 0.05, 0.05))
 	light := trace.NewLight(trace.NewUniform(15, 15, 15))
@@ -159,7 +159,7 @@ func cornell(aspect float64) (trace.Camera, *trace.List) {
 	)
 }
 
-func simpleLight(aspect float64) (trace.Camera, *trace.List) {
+func simpleLight(aspect float64) (*trace.Camera, *trace.List) {
 	perlin := trace.NewNoise(4, 1, 2)
 	from := geom.Vec{25, 4, 6}
 	at := geom.Vec{0, 2, 0}
