@@ -4,6 +4,8 @@ import (
 	"math"
 	"math/rand"
 	"sort"
+
+	"github.com/hunterloftis/oneweekend/pkg/geom"
 )
 
 const costTraverse = 1
@@ -117,4 +119,91 @@ func boundsAround(t0, t1 float64, ss []Surface) (b *AABB) {
 		b = s.Bounds(t0, t1).Plus(b)
 	}
 	return
+}
+
+// AABB is an axis-aligned bounding box.
+type AABB struct {
+	min geom.Vec
+	max geom.Vec
+}
+
+// NewAABB creates a new axis-aligned bounding box with the given min and max points.
+func NewAABB(min, max geom.Vec) *AABB {
+	return &AABB{min: min.Min(max), max: max.Max(min)}
+}
+
+// Hit returns whether or not r hits the box between distances dMin and dMax.
+func (a *AABB) Hit(r Ray, dMin, dMax float64) bool {
+	for i := 0; i < 3; i++ {
+		invD := 1 / r.Dir[i]
+		d0 := (a.min[i] - r.Or[i]) * invD
+		d1 := (a.max[i] - r.Or[i]) * invD
+		if invD < 0 {
+			d0, d1 = d1, d0
+		}
+		if d0 > dMin {
+			dMin = d0
+		}
+		if d1 < dMax {
+			dMax = d1
+		}
+		if dMax <= dMin {
+			return false
+		}
+	}
+	return true
+}
+
+// Plus returns a new bounding box that encloses both this box and b.
+// If b is nil, the new box will be equivalent to this box.
+func (a *AABB) Plus(b *AABB) *AABB {
+	if b == nil {
+		return NewAABB(a.min, a.max)
+	}
+	return NewAABB(a.min.Min(b.min), a.max.Max(b.max))
+}
+
+// Corners returns the eight corners of this bounding box.
+func (a *AABB) Corners() []geom.Vec {
+	c := make([]geom.Vec, 0, 8)
+	for i := 0.0; i < 2; i++ {
+		for j := 0.0; j < 2; j++ {
+			for k := 0.0; k < 2; k++ {
+				x := i*a.min.X() + (1-i)*a.max.X()
+				y := j*a.min.Y() + (1-j)*a.max.Y()
+				z := k*a.min.Z() + (1-k)*a.max.Z()
+				c = append(c, geom.Vec{x, y, z})
+			}
+		}
+	}
+	return c
+}
+
+// Extended returns an extended bounding box that also encloses v.
+func (a *AABB) Extended(v geom.Vec) *AABB {
+	return NewAABB(a.min.Min(v), a.max.Max(v))
+}
+
+// Min returns the minimum corner of this bounding box.
+func (a *AABB) Min() geom.Vec {
+	return a.min
+}
+
+// Max returns the maximum corner of this bounding box.
+func (a *AABB) Max() geom.Vec {
+	return a.max
+}
+
+// SurfaceArea returns the total surface area of this bounding box.
+func (a *AABB) SurfaceArea() float64 {
+	dims := a.max.Minus(a.min)
+	front := dims.X() * dims.Y()
+	side := dims.Z() * dims.Y()
+	top := dims.X() * dims.Z()
+	return (front + side + top) * 2
+}
+
+// Mid returns the mid-point of this bounding box.
+func (a *AABB) Mid() geom.Vec {
+	return a.min.Plus(a.max).Scaled(0.5)
 }

@@ -42,7 +42,7 @@ func custom(aspect float64) (*trace.Camera, *trace.BVH) {
 	list.Add(trace.NewMovingSphere(center, center.Plus(geom.Vec{30, 0, 0}), 0, 1, 50, trace.NewLambert(trace.NewUniform(0.7, 0.3, 0.1))))
 	list.Add(trace.NewSphere(geom.Vec{260, 150, 45}, 50, trace.NewDielectric(1.5)))
 	boundary := trace.NewSphere(geom.Vec{0, 0, 0}, 5000, trace.NewDielectric(1.5))
-	list.Add(trace.NewVolume(boundary, 0.0001, trace.NewIso(trace.NewUniform(1, 1, 1))))
+	list.Add(trace.NewVolume(boundary, 0.0001, trace.NewIsotropic(trace.NewUniform(1, 1, 1))))
 	f, err := os.Open("images/earthmap.jpg")
 	if err != nil {
 		panic(err)
@@ -88,9 +88,9 @@ func final(aspect float64) (*trace.Camera, *trace.List) {
 	list.Add(trace.NewSphere(geom.Vec{0, 150, 145}, 50, trace.NewMetal(trace.NewUniform(0.8, 0.8, 0.9), 1)))
 	boundary := trace.NewSphere(geom.Vec{360, 150, 145}, 70, trace.NewDielectric(1.5))
 	list.Add(boundary)
-	list.Add(trace.NewVolume(boundary, 0.2, trace.NewIso(trace.NewUniform(0.2, 0.4, 0.9))))
+	list.Add(trace.NewVolume(boundary, 0.2, trace.NewIsotropic(trace.NewUniform(0.2, 0.4, 0.9))))
 	boundary = trace.NewSphere(geom.Vec{0, 0, 0}, 5000, trace.NewDielectric(1.5))
-	list.Add(trace.NewVolume(boundary, 0.0001, trace.NewIso(trace.NewUniform(1, 1, 1))))
+	list.Add(trace.NewVolume(boundary, 0.0001, trace.NewIsotropic(trace.NewUniform(1, 1, 1))))
 	f, err := os.Open("images/earthmap.jpg")
 	if err != nil {
 		panic(err)
@@ -118,8 +118,8 @@ func cornellSmoke(aspect float64) (*trace.Camera, *trace.List) {
 	red := trace.NewLambert(trace.NewUniform(0.65, 0.05, 0.05))
 	light := trace.NewLight(trace.NewUniform(7, 7, 7))
 	white := trace.NewLambert(trace.NewUniform(0.73, 0.73, 0.73))
-	smoke := trace.NewIso(trace.NewUniform(0, 0, 0))
-	fog := trace.NewIso(trace.NewUniform(1, 1, 1))
+	smoke := trace.NewIsotropic(trace.NewUniform(0, 0, 0))
+	fog := trace.NewIsotropic(trace.NewUniform(1, 1, 1))
 	b1 := trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.Vec{0, 0, 0}, geom.Vec{165, 165, 165}, white), -18), geom.Vec{130, 0, 65})
 	b2 := trace.NewTranslate(trace.NewRotateY(trace.NewBox(geom.Vec{0, 0, 0}, geom.Vec{165, 330, 165}, white), 15), geom.Vec{265, 0, 295})
 	from := geom.Vec{278, 278, -800}
