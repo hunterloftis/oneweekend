@@ -46,7 +46,7 @@ func (wi Window) WritePPM(w io.Writer, cam Camera, s Surface, samples int) error
 		for y := range jobs {
 			res := result{row: y, pixels: ""}
 			for x := 0; x < wi.width; x++ {
-				c := NewColor(0, 0, 0)
+				c := black
 				for n := 0; n < samples; n++ {
 					u := (float64(x) + rnd.Float64()) / float64(wi.width)
 					v := 1 - (float64(y)+rnd.Float64())/float64(wi.height)
@@ -91,7 +91,7 @@ func (wi Window) WritePPM(w io.Writer, cam Camera, s Surface, samples int) error
 
 func color(r Ray, h Surface, depth int, rnd *rand.Rand) Color {
 	if depth > 50 {
-		return NewColor(0, 0, 0)
+		return black
 	}
 	if hit := h.Hit(r, bias, math.MaxFloat64, rnd); hit != nil {
 		emit := hit.Mat.Emit(hit.UV, hit.Pt)
@@ -102,7 +102,7 @@ func color(r Ray, h Surface, depth int, rnd *rand.Rand) Color {
 		indirect := color(NewRay(hit.Pt, out, r.T), h, depth+1, rnd).Times(attenuate)
 		return emit.Plus(indirect)
 	}
-	return NewColor(0, 0, 0)
+	return black
 }
 
 // Camera originates Rays.
@@ -124,8 +124,8 @@ func NewCamera(lookFrom, lookAt geom.Vec, vup geom.Unit, vfov, aspect, aperture,
 	halfW := aspect * halfH
 
 	c.w = lookFrom.Minus(lookAt).Unit()
-	c.u = vup.Cross(c.w.Vec).Unit()
-	c.v = c.w.Cross(c.u.Vec).Unit()
+	c.u = geom.Vec(vup).Cross(geom.Vec(c.w)).Unit()
+	c.v = geom.Vec(c.w).Cross(geom.Vec(c.u)).Unit()
 
 	width := c.u.Scaled(halfW * focus)
 	height := c.v.Scaled(halfH * focus)

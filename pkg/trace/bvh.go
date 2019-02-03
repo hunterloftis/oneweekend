@@ -91,7 +91,7 @@ func split(t0, t1 float64, axis int, fraction float64, ss []Surface) (ll, rr []S
 	sort.Slice(ss2, func(i, j int) bool {
 		m0 := ss2[i].Bounds(t0, t1).Mid()
 		m1 := ss2[j].Bounds(t0, t1).Mid()
-		return m0.E[axis] < m1.E[axis]
+		return m0[axis] < m1[axis]
 	})
 	split := int(math.Floor(float64(len(ss2))*fraction + 1))
 	return ss2[0:split], ss2[split:]

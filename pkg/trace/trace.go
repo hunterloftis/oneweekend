@@ -46,9 +46,9 @@ func NewAABB(min, max geom.Vec) *AABB {
 // Hit returns whether or not a given ray hits the *AABB between dMin and dMax distances
 func (a *AABB) Hit(r Ray, dMin, dMax float64) bool {
 	for i := 0; i < 3; i++ {
-		invD := 1 / r.Dir.E[i]
-		d0 := (a.min.E[i] - r.Or.E[i]) * invD
-		d1 := (a.max.E[i] - r.Or.E[i]) * invD
+		invD := 1 / r.Dir[i]
+		d0 := (a.min[i] - r.Or[i]) * invD
+		d1 := (a.max[i] - r.Or[i]) * invD
 		if invD < 0 {
 			d0, d1 = d1, d0
 		}
@@ -83,7 +83,7 @@ func (a *AABB) Corners() []geom.Vec {
 				x := i*a.min.X() + (1-i)*a.max.X()
 				y := j*a.min.Y() + (1-j)*a.max.Y()
 				z := k*a.min.Z() + (1-k)*a.max.Z()
-				c = append(c, geom.NewVec(x, y, z))
+				c = append(c, geom.Vec{x, y, z})
 			}
 		}
 	}

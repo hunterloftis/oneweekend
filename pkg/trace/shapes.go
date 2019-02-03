@@ -37,7 +37,7 @@ func NewMovingSphere(center0, center1 geom.Vec, t0, t1, radius float64, m Materi
 func (s *Sphere) Hit(r Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 	oc := r.Or.Minus(s.Center(r.T))
 	a := r.Dir.Dot(r.Dir)
-	b := oc.Dot(r.Dir.Vec)
+	b := oc.Dot(geom.Vec(r.Dir))
 	c := oc.Dot(oc) - s.rad*s.rad
 	disc := b*b - a*c
 	if disc <= 0 {
@@ -71,12 +71,12 @@ func (s *Sphere) Center(t float64) geom.Vec {
 // Bounds returns the Axis-Aligned Bounding Bounds of the sphere encompassing all times between t0 and t1
 func (s *Sphere) Bounds(t0, t1 float64) *AABB {
 	bounds0 := NewAABB(
-		s.Center(t0).Minus(geom.NewVec(s.rad, s.rad, s.rad)),
-		s.Center(t0).Plus(geom.NewVec(s.rad, s.rad, s.rad)),
+		s.Center(t0).Minus(geom.Vec{s.rad, s.rad, s.rad}),
+		s.Center(t0).Plus(geom.Vec{s.rad, s.rad, s.rad}),
 	)
 	bounds1 := NewAABB(
-		s.Center(t1).Minus(geom.NewVec(s.rad, s.rad, s.rad)),
-		s.Center(t1).Plus(geom.NewVec(s.rad, s.rad, s.rad)),
+		s.Center(t1).Minus(geom.Vec{s.rad, s.rad, s.rad}),
+		s.Center(t1).Plus(geom.Vec{s.rad, s.rad, s.rad}),
 	)
 	return bounds0.Plus(bounds1)
 }
@@ -88,7 +88,7 @@ func (s *Sphere) UV(p geom.Vec, t float64) (uv geom.Vec) {
 	theta := math.Asin(p2.Y())
 	u := 1 - (phi+math.Pi)/(2*math.Pi)
 	v := (theta + math.Pi/2) / math.Pi
-	return geom.NewVec(u, v, 0)
+	return geom.Vec{u, v, 0}
 }
 
 // Rect represents an axis-aligned rectangle
@@ -122,23 +122,23 @@ func (r *Rect) Hit(in Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 	a0 := r.axis
 	a1 := (a0 + 1) % 3
 	a2 := (a0 + 2) % 3
-	k := r.min.E[a0]
-	d := (k - in.Or.E[a0]) / in.Dir.E[a0]
+	k := r.min[a0]
+	d := (k - in.Or[a0]) / in.Dir[a0]
 	if d < dMin || d > dMax {
 		return nil
 	}
-	e1 := in.Or.E[a1] + d*in.Dir.E[a1]
-	e2 := in.Or.E[a2] + d*in.Dir.E[a2]
-	if e1 < r.min.E[a1] || e1 > r.max.E[a1] || e2 < r.min.E[a2] || e2 > r.max.E[a2] {
+	e1 := in.Or[a1] + d*in.Dir[a1]
+	e2 := in.Or[a2] + d*in.Dir[a2]
+	if e1 < r.min[a1] || e1 > r.max[a1] || e2 < r.min[a2] || e2 > r.max[a2] {
 		return nil
 	}
-	u := (e1 - r.min.E[a1]) / (r.max.E[a1] - r.min.E[a1])
-	v := (e2 - r.min.E[a2]) / (r.max.E[a2] - r.min.E[a2])
-	norm := geom.NewUnit(0, 0, 0)
-	norm.E[a0] = 1
+	u := (e1 - r.min[a1]) / (r.max[a1] - r.min[a1])
+	v := (e2 - r.min[a2]) / (r.max[a2] - r.min[a2])
+	norm := geom.Unit{0, 0, 0}
+	norm[a0] = 1
 	return &Hit{
 		Dist: d,
-		UV:   geom.NewVec(u, v, 0),
+		UV:   geom.Vec{u, v, 0},
 		Pt:   in.At(d),
 		Mat:  r.mat,
 		Norm: norm,
@@ -147,8 +147,8 @@ func (r *Rect) Hit(in Ray, dMin, dMax float64, _ *rand.Rand) *Hit {
 
 // Bounds returns the axis Aligned Bounding Box encompassing the Rect.
 func (r *Rect) Bounds(t0, t1 float64) *AABB {
-	bias := geom.NewVec(0, 0, 0)
-	bias.E[r.axis] = 0.001
+	bias := geom.Vec{0, 0, 0}
+	bias[r.axis] = 0.001
 	return NewAABB(r.min.Minus(bias), r.max.Plus(bias))
 }
 
@@ -158,11 +158,11 @@ type Box struct {
 
 func NewBox(min, max geom.Vec, m Material) *Box {
 	return &Box{List: *NewList(
-		NewRect(geom.NewVec(min.X(), min.Y(), max.Z()), geom.NewVec(max.X(), max.Y(), max.Z()), m),
-		NewFlip(NewRect(geom.NewVec(min.X(), min.Y(), min.Z()), geom.NewVec(max.X(), max.Y(), min.Z()), m)),
-		NewRect(geom.NewVec(min.X(), max.Y(), min.Z()), geom.NewVec(max.X(), max.Y(), max.Z()), m),
-		NewFlip(NewRect(geom.NewVec(min.X(), min.Y(), min.Z()), geom.NewVec(max.X(), min.Y(), max.Z()), m)),
-		NewRect(geom.NewVec(max.X(), min.Y(), min.Z()), geom.NewVec(max.X(), max.Y(), max.Z()), m),
-		NewFlip(NewRect(geom.NewVec(min.X(), min.Y(), min.Z()), geom.NewVec(min.X(), max.Y(), max.Z()), m)),
+		NewRect(geom.Vec{min.X(), min.Y(), max.Z()}, geom.Vec{max.X(), max.Y(), max.Z()}, m),
+		NewFlip(NewRect(geom.Vec{min.X(), min.Y(), min.Z()}, geom.Vec{max.X(), max.Y(), min.Z()}, m)),
+		NewRect(geom.Vec{min.X(), max.Y(), min.Z()}, geom.Vec{max.X(), max.Y(), max.Z()}, m),
+		NewFlip(NewRect(geom.Vec{min.X(), min.Y(), min.Z()}, geom.Vec{max.X(), min.Y(), max.Z()}, m)),
+		NewRect(geom.Vec{max.X(), min.Y(), min.Z()}, geom.Vec{max.X(), max.Y(), max.Z()}, m),
+		NewFlip(NewRect(geom.Vec{min.X(), min.Y(), min.Z()}, geom.Vec{min.X(), max.Y(), max.Z()}, m)),
 	)}
 }

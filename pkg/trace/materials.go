@@ -10,7 +10,7 @@ import (
 type nonEmitter struct{}
 
 func (n nonEmitter) Emit(uv, p geom.Vec) Color {
-	return NewColor(0, 0, 0)
+	return black
 }
 
 // Dielectric describes a non-metallic material
@@ -33,18 +33,18 @@ func (d Dielectric) Scatter(in, n geom.Unit, _, _ geom.Vec, rnd *rand.Rand) (out
 	if in.Dot(n) > 0 {
 		outNormal = n.Inv()
 		ratio = d.iRefract
-		cos = d.iRefract * in.Dot(n) / in.Len()
+		cos = d.iRefract * in.Dot(n)
 	} else {
 		outNormal = n
 		ratio = 1 / d.iRefract
-		cos = -in.Dot(n) / in.Len()
+		cos = -in.Dot(n)
 	}
 
 	out, refracted := refract(in, outNormal, ratio)
 	if !refracted || schlick(cos, d.iRefract) > rnd.Float64() {
 		out = reflect(in, n)
 	}
-	return out, NewColor(1, 1, 1), true
+	return out, white, true
 }
 
 func refract(u, n geom.Unit, ratio float64) (u2 geom.Unit, ok bool) {
@@ -54,7 +54,7 @@ func refract(u, n geom.Unit, ratio float64) (u2 geom.Unit, ok bool) {
 		return u2, false
 	}
 	// TODO: compose this so it's more readable
-	u2 = (u.Minus(n.Scaled(dt)).Scaled(ratio)).Minus(n.Scaled(math.Sqrt(disc))).Unit()
+	u2 = (geom.Vec(u).Minus(n.Scaled(dt)).Scaled(ratio)).Minus(n.Scaled(math.Sqrt(disc))).Unit()
 	return u2, true
 }
 
@@ -90,7 +90,7 @@ func NewLambert(texture Mapper) Lambert {
 
 // Scatter scatters incoming light rays in a hemisphere about the normal.
 func (l Lambert) Scatter(in, n geom.Unit, uv, p geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
-	out = n.Plus(geom.RandVecInSphere(rnd)).Unit()
+	out = geom.Vec(n).Plus(geom.RandVecInSphere(rnd)).Unit()
 	attenuate = l.texture.Map(uv, p)
 	return out, attenuate, true
 }
@@ -126,11 +126,11 @@ func NewMetal(texture Mapper, roughness float64) Metal {
 // Scatter reflects incoming light rays about the normal.
 func (m Metal) Scatter(in, norm geom.Unit, uv, p geom.Vec, rnd *rand.Rand) (out geom.Unit, attenuate Color, ok bool) {
 	r := reflect(in, norm)
-	out = r.Plus(geom.RandVecInSphere(rnd).Scaled(m.rough)).Unit()
+	out = geom.Vec(r).Plus(geom.RandVecInSphere(rnd).Scaled(m.rough)).Unit()
 	return out, m.texture.Map(uv, p), out.Dot(norm) > 0
 }
 
 // Reflect reflects this unit vector about a normal vector n.
 func reflect(u, n geom.Unit) geom.Unit {
-	return geom.Unit{Vec: u.Minus(n.Scaled(2 * u.Dot(n)))}
+	return geom.Unit(geom.Vec(u).Minus(geom.Vec(n).Scaled(2 * u.Dot(n)))) // TODO: prove this is still a unit vector
 }

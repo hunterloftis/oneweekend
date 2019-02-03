@@ -88,12 +88,12 @@ func interp(c []geom.Unit, u, v, w float64) (sum float64) {
 	for i := 0; i < 2; i++ {
 		for j := 0; j < 2; j++ {
 			for k := 0; k < 2; k++ {
-				weightV := geom.NewVec(u-float64(i), v-float64(j), w-float64(k))
+				weightV := geom.Vec{u - float64(i), v - float64(j), w - float64(k)}
 				xyz := c[4*i+2*j+k]
 				sum += (float64(i)*uu + (1-float64(i))*(1-uu)) *
 					(float64(j)*vv + (1-float64(j))*(1-vv)) *
 					(float64(k)*ww + (1-float64(k))*(1-ww)) *
-					xyz.Vec.Dot(weightV)
+					geom.Vec(xyz).Dot(weightV)
 			}
 		}
 	}

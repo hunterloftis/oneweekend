@@ -46,8 +46,8 @@ func (v *Volume) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	}
 	return &Hit{
 		Dist: d,
-		Norm: geom.NewUnit(1, 0, 0),
-		UV:   geom.NewVec(0, 0, 0),
+		Norm: geom.Unit{1, 0, 0},
+		UV:   geom.Vec{0, 0, 0},
 		Pt:   r.At(d),
 		Mat:  v.phase,
 	}

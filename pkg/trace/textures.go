@@ -47,7 +47,7 @@ type Uniform struct {
 
 // NewUniform returns a new Uniform texture
 func NewUniform(r, g, b float64) Uniform {
-	return Uniform{c: NewColor(r, g, b)}
+	return Uniform{c: Color{r, g, b}}
 }
 
 // Map maps a u, v coordinate in 3d space p to a Color
@@ -108,7 +108,7 @@ func (i *Image) Map(uv, p geom.Vec) Color {
 	}
 	c := i.data.At(x, y)
 	r, g, b, _ := c.RGBA()
-	return NewColor(float64(r)/65535, float64(g)/65535, float64(b)/65535)
+	return Color{float64(r) / 65535, float64(g) / 65535, float64(b) / 65535}
 }
 
 // Noise represents a Perlin noise texture
@@ -124,6 +124,6 @@ func NewNoise(scale0, scale1 float64, axis int) Noise {
 
 // Map maps a u, v coordinate in 3d space p to a Color
 func (n Noise) Map(uv, p geom.Vec) Color {
-	bright := 0.5 * (1 + math.Sin(n.scale0*p.E[n.axis]+10*turb(p.Scaled(n.scale1), 7)))
-	return NewColor(1, 1, 1).Scaled(bright)
+	bright := 0.5 * (1 + math.Sin(n.scale0*p[n.axis]+10*turb(p.Scaled(n.scale1), 7)))
+	return white.Scaled(bright)
 }

@@ -52,10 +52,10 @@ func NewRotateY(child Surface, angle float64) *RotateY {
 }
 
 func (r *RotateY) Hit(in Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
-	in2 := NewRay(r.left(in.Or), geom.Unit{Vec: r.left(in.Dir.Vec)}, in.T)
+	in2 := NewRay(r.left(in.Or), geom.Unit(r.left(geom.Vec(in.Dir))), in.T)
 	hit := r.child.Hit(in2, dMin, dMax, rnd)
 	if hit != nil {
-		hit.Norm = geom.Unit{Vec: r.right(hit.Norm.Vec)}
+		hit.Norm = geom.Unit(r.right(geom.Vec(hit.Norm)))
 		hit.Pt = r.right(hit.Pt)
 	}
 	return hit
@@ -68,13 +68,13 @@ func (r *RotateY) Bounds(t0, t1 float64) *AABB {
 func (r *RotateY) right(dir geom.Vec) geom.Vec {
 	x := r.cosTheta*dir.X() + r.sinTheta*dir.Z()
 	z := -r.sinTheta*dir.X() + r.cosTheta*dir.Z()
-	return geom.NewVec(x, dir.Y(), z)
+	return geom.Vec{x, dir.Y(), z}
 }
 
 func (r *RotateY) left(dir geom.Vec) geom.Vec {
 	x := r.cosTheta*dir.X() - r.sinTheta*dir.Z()
 	z := r.sinTheta*dir.X() + r.cosTheta*dir.Z()
-	return geom.NewVec(x, dir.Y(), z)
+	return geom.Vec{x, dir.Y(), z}
 }
 
 // Flip overrides the Bounce method of a Surface to invert surface normals.
