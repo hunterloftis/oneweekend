@@ -1,4 +1,4 @@
-# Ray Tracing in Go
+# Ray Tracing in Golang
 
 This is a chapter-by-chapter progression through the excellent
 free [ray-tracing books](https://drive.google.com/drive/folders/14yayBb9XiL16lmuhbYhhvea8mKUUK77W)
