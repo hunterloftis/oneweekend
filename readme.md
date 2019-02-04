@@ -11,10 +11,10 @@ and [commits at each checkpoint](https://github.com/hunterloftis/oneweekend/comm
 
 ## One-liner
 
-Try it!
+Render a quick image:
 
 ```
-go run github.com/hunterloftis/oneweekend/cmd/trace > test.ppm && open test.ppm
+$ go run github.com/hunterloftis/oneweekend/cmd/trace > test.ppm && open test.ppm
 ```
 
 ## Who is this for?
