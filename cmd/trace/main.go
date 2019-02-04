@@ -16,9 +16,9 @@ func main() {
 		wd, _ := os.Getwd()
 		defer profile.Start(profile.ProfilePath(wd)).Stop()
 	}
-	w := trace.NewWindow(500, 500)
+	w := trace.NewWindow(250, 250)
 	cam, scene := final(w.Aspect())
-	if err := w.WritePPM(os.Stdout, cam, scene, 500); err != nil {
+	if err := w.WritePPM(os.Stdout, cam, scene, 250); err != nil {
 		panic(err)
 	}
 }
