@@ -2,15 +2,20 @@
 
 This is a chapter-by-chapter progression through the excellent
 free [ray-tracing books](https://drive.google.com/drive/folders/14yayBb9XiL16lmuhbYhhvea8mKUUK77W)
-by Peter Shirley:
-
-- [Ray Tracing in One Weekend](#ray-tracing-in-one-weekend)
-- [Ray Tracing: the Next Week](#ray-tracing-the-next-week)
+by Peter Shirley.
 
 [![GoDoc](https://godoc.org/github.com/hunterloftis/oneweekend/oneweekend?status.svg)](https://godoc.org/github.com/hunterloftis/oneweekend)
 
 There are [tags at each chapter](https://github.com/hunterloftis/oneweekend/releases)
 and [commits at each checkpoint](https://github.com/hunterloftis/oneweekend/commits/master) within chapters.
+
+## One-liner
+
+Try it!
+
+```
+go run github.com/hunterloftis/oneweekend/cmd/trace > test.ppm && open test.ppm
+```
 
 ## Who is this for?
 
