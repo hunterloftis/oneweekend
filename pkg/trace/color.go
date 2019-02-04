@@ -53,3 +53,8 @@ func (c Color) Gamma(n float64) Color {
 		math.Pow(c.B(), ni),
 	}
 }
+
+// RGBInt returns the red, green, and blue components as integers in a 0-255 range.
+func (c Color) RGBInt() (r, g, b int) {
+	return int(math.Min(255, 255*c[0])), int(math.Min(255, 255*c[1])), int(math.Min(255, 255*c[2]))
+}

@@ -44,7 +44,11 @@ func (wi *Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) err
 		return err
 	}
 
-	worker := func(jobs <-chan int, results chan<- result, rnd *rand.Rand) {
+	// create worker goroutines and one job per image row.
+	nw := runtime.NumCPU() + 1
+	jobs := make(chan int, wi.height)
+	results := make(chan result, nw*2)
+	worker := func(rnd *rand.Rand) {
 		for y := range jobs {
 			var px strings.Builder
 			for x := 0; x < wi.width; x++ {
@@ -53,31 +57,26 @@ func (wi *Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) err
 					u := (float64(x) + rnd.Float64()) / float64(wi.width)
 					v := 1 - (float64(y)+rnd.Float64())/float64(wi.height)
 					r := cam.Ray(u, v, rnd)
-					c = c.Plus(color(r, s, 0, rnd))
+					c = color(r, s, 0, rnd).Plus(c)
 				}
 				c = c.Scaled(1 / float64(samples)).Gamma(2)
-				ir := int(math.Min(255, 255.99*c.R()))
-				ig := int(math.Min(255, 255.99*c.G()))
-				ib := int(math.Min(255, 255.99*c.B()))
-				fmt.Fprintln(&px, ir, ig, ib)
+				r, g, b := c.RGBInt()
+				fmt.Fprintln(&px, r, g, b)
 			}
 			results <- result{row: y, pixels: px.String()}
 		}
 	}
-
-	workers := runtime.NumCPU() + 1
-	jobs := make(chan int, wi.height)
-	results := make(chan result, workers+1)
-	pending := make(map[int]string, 0)
-	cursor := 0
-
-	for w := 0; w < workers; w++ {
-		go worker(jobs, results, rand.New(rand.NewSource(time.Now().Unix())))
+	for w := 0; w < nw; w++ {
+		go worker(rand.New(rand.NewSource(time.Now().Unix())))
 	}
 	for y := 0; y < wi.height; y++ {
 		jobs <- y
 	}
 	close(jobs)
+
+	// buffer results and write them in order.
+	cursor := 0
+	pending := make(map[int]string, 0)
 	for y := 0; y < wi.height; y++ {
 		r := <-results
 		pending[r.row] = r.pixels
@@ -92,7 +91,7 @@ func (wi *Window) WritePPM(w io.Writer, cam *Camera, s Surface, samples int) err
 }
 
 func color(r Ray, h Surface, depth int, rnd *rand.Rand) Color {
-	if depth > 50 {
+	if depth >= 50 {
 		return black
 	}
 	if hit := h.Hit(r, bias, math.MaxFloat64, rnd); hit != nil {
