@@ -4,10 +4,10 @@ This is a chapter-by-chapter progression through the excellent
 free [ray-tracing books](https://drive.google.com/drive/folders/14yayBb9XiL16lmuhbYhhvea8mKUUK77W)
 by Peter Shirley.
 
-[![GoDoc](https://godoc.org/github.com/hunterloftis/oneweekend/oneweekend?status.svg)](https://godoc.org/github.com/hunterloftis/oneweekend)
-
 There are [tags at each chapter](https://github.com/hunterloftis/oneweekend/releases)
 and [commits at each checkpoint](https://github.com/hunterloftis/oneweekend/commits/master) within chapters.
+
+[![GoDoc](https://godoc.org/github.com/hunterloftis/oneweekend/oneweekend?status.svg)](https://godoc.org/github.com/hunterloftis/oneweekend)
 
 ## One-liner
 
