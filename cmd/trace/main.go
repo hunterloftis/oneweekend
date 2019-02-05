@@ -16,14 +16,14 @@ func main() {
 		wd, _ := os.Getwd()
 		defer profile.Start(profile.ProfilePath(wd)).Stop()
 	}
-	w := trace.NewWindow(250, 250)
-	cam, scene := final(w.Aspect())
-	if err := w.WritePPM(os.Stdout, cam, scene, 250); err != nil {
+	w := trace.NewWindow(400, 300)
+	cam, scene := final()
+	if err := w.WritePPM(os.Stdout, cam, scene, 200); err != nil {
 		panic(err)
 	}
 }
 
-func custom(aspect float64) (*trace.Camera, *trace.BVH) {
+func custom() (*trace.Camera, *trace.BVH) {
 	rand.Seed(10)
 	nb := 20
 	w := 100.0
@@ -58,11 +58,11 @@ func custom(aspect float64) (*trace.Camera, *trace.BVH) {
 	from := geom.Vec{478, 278, -600}
 	at := geom.Vec{278, 278, 0}
 	focus := 10.0
-	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, aspect, 0, focus, 0, 1)
+	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, 0, focus, 0, 1)
 	return cam, trace.NewBVH(0, 1, list.Surfaces()...)
 }
 
-func final(aspect float64) (*trace.Camera, *trace.List) {
+func final() (*trace.Camera, *trace.List) {
 	rand.Seed(10)
 	nb := 20
 	w := 100.0
@@ -109,11 +109,11 @@ func final(aspect float64) (*trace.Camera, *trace.List) {
 	from := geom.Vec{478, 278, -600}
 	at := geom.Vec{278, 278, 0}
 	focus := 10.0
-	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, aspect, 0, focus, 0, 1)
+	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, 0, focus, 0, 1)
 	return cam, list
 }
 
-func cornellSmoke(aspect float64) (*trace.Camera, *trace.List) {
+func cornellSmoke() (*trace.Camera, *trace.List) {
 	green := trace.NewLambert(trace.NewUniform(0.12, 0.45, 0.15))
 	red := trace.NewLambert(trace.NewUniform(0.65, 0.05, 0.05))
 	light := trace.NewLight(trace.NewUniform(7, 7, 7))
@@ -125,7 +125,7 @@ func cornellSmoke(aspect float64) (*trace.Camera, *trace.List) {
 	from := geom.Vec{278, 278, -800}
 	at := geom.Vec{278, 278, 0}
 	focus := 10.0
-	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, aspect, 0, focus, 0, 1)
+	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, 0, focus, 0, 1)
 	return cam, trace.NewList(
 		trace.NewFlip(trace.NewRect(geom.Vec{555, 0, 0}, geom.Vec{555, 555, 555}, green)),
 		trace.NewRect(geom.Vec{0, 0, 0}, geom.Vec{0, 555, 555}, red),
@@ -138,7 +138,7 @@ func cornellSmoke(aspect float64) (*trace.Camera, *trace.List) {
 	)
 }
 
-func cornell(aspect float64) (*trace.Camera, *trace.List) {
+func cornell() (*trace.Camera, *trace.List) {
 	green := trace.NewLambert(trace.NewUniform(0.12, 0.45, 0.15))
 	red := trace.NewLambert(trace.NewUniform(0.65, 0.05, 0.05))
 	light := trace.NewLight(trace.NewUniform(15, 15, 15))
@@ -146,7 +146,7 @@ func cornell(aspect float64) (*trace.Camera, *trace.List) {
 	from := geom.Vec{278, 278, -800}
 	at := geom.Vec{278, 278, 0}
 	focus := 10.0
-	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, aspect, 0, focus, 0, 1)
+	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, 0, focus, 0, 1)
 	return cam, trace.NewList(
 		trace.NewFlip(trace.NewRect(geom.Vec{555, 0, 0}, geom.Vec{555, 555, 555}, green)),
 		trace.NewRect(geom.Vec{0, 0, 0}, geom.Vec{0, 555, 555}, red),
@@ -159,12 +159,12 @@ func cornell(aspect float64) (*trace.Camera, *trace.List) {
 	)
 }
 
-func simpleLight(aspect float64) (*trace.Camera, *trace.List) {
+func simpleLight() (*trace.Camera, *trace.List) {
 	perlin := trace.NewNoise(4, 1, 2)
 	from := geom.Vec{25, 4, 6}
 	at := geom.Vec{0, 2, 0}
 	focus := 10.0
-	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 20, aspect, 0, focus, 0, 1)
+	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 20, 0, focus, 0, 1)
 	return cam, trace.NewList(
 		trace.NewSphere(geom.Vec{0, -1000, 0}, 1000, trace.NewLambert(perlin)),
 		trace.NewSphere(geom.Vec{0, 2, 0}, 2, trace.NewLambert(perlin)),
