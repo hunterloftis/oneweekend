@@ -27,22 +27,22 @@ func custom() (*trace.Camera, *trace.BVH) {
 	rand.Seed(10)
 	nb := 20
 	w := 100.0
-	list := trace.NewList()
+	var ss []trace.Surface
 	ground := trace.NewLambert(trace.NewUniform(0.48, 0.83, 0.53))
 	light := trace.NewLight(trace.NewUniform(1, 1, 1))
 	for i := 0; i < nb; i++ {
 		for j := 0; j < nb; j++ {
 			min := geom.Vec{-1000 + float64(i)*w, 0, -1000 + float64(j)*w}
 			max := geom.Vec{w, 1 + 99*rand.Float64(), w}.Plus(min)
-			list.Add(trace.NewBox(min, max, ground))
+			ss = append(ss, trace.NewBox(min, max, ground))
 		}
 	}
-	list.Add(trace.NewRect(geom.Vec{123, 554, 147}, geom.Vec{423, 554, 412}, light))
+	ss = append(ss, trace.NewRect(geom.Vec{123, 554, 147}, geom.Vec{423, 554, 412}, light))
 	center := geom.Vec{400, 400, 200}
-	list.Add(trace.NewMovingSphere(center, center.Plus(geom.Vec{30, 0, 0}), 0, 1, 50, trace.NewLambert(trace.NewUniform(0.7, 0.3, 0.1))))
-	list.Add(trace.NewSphere(geom.Vec{260, 150, 45}, 50, trace.NewDielectric(1.5)))
+	ss = append(ss, trace.NewMovingSphere(center, center.Plus(geom.Vec{30, 0, 0}), 0, 1, 50, trace.NewLambert(trace.NewUniform(0.7, 0.3, 0.1))))
+	ss = append(ss, trace.NewSphere(geom.Vec{260, 150, 45}, 50, trace.NewDielectric(1.5)))
 	boundary := trace.NewSphere(geom.Vec{0, 0, 0}, 5000, trace.NewDielectric(1.5))
-	list.Add(trace.NewVolume(boundary, 0.0001, trace.NewIsotropic(trace.NewUniform(1, 1, 1))))
+	ss = append(ss, trace.NewVolume(boundary, 0.0001, trace.NewIsotropic(trace.NewUniform(1, 1, 1))))
 	f, err := os.Open("images/earthmap.jpg")
 	if err != nil {
 		panic(err)
@@ -51,15 +51,16 @@ func custom() (*trace.Camera, *trace.BVH) {
 	if err != nil {
 		panic(err)
 	}
-	list.Add(trace.NewSphere(geom.Vec{100, 150, 100}, 50, trace.NewMetal(trace.NewBright(earth, 1.5), 0.1)))
-	list.Add(trace.NewSphere(geom.Vec{400, 200, 400}, 100, trace.NewLight(trace.NewBright(earth, 3))))
+	ss = append(ss, trace.NewSphere(geom.Vec{100, 150, 100}, 50, trace.NewMetal(trace.NewBright(earth, 1.5), 0.1)))
+	ss = append(ss, trace.NewSphere(geom.Vec{400, 200, 400}, 100, trace.NewLight(trace.NewBright(earth, 3))))
 	perlin := trace.NewNoise(0.1, 0.1, 0)
-	list.Add(trace.NewSphere(geom.Vec{220, 280, 300}, 80, trace.NewLambert(perlin)))
+	ss = append(ss, trace.NewSphere(geom.Vec{220, 280, 300}, 80, trace.NewLambert(perlin)))
+
 	from := geom.Vec{478, 278, -600}
 	at := geom.Vec{278, 278, 0}
 	focus := 10.0
 	cam := trace.NewCamera(from, at, geom.Unit{0, 1, 0}, 40, 0, focus, 0, 1)
-	return cam, trace.NewBVH(0, 1, list.Surfaces()...)
+	return cam, trace.NewBVH(0, 1, ss...)
 }
 
 func final() (*trace.Camera, *trace.BVH) {
@@ -104,6 +105,7 @@ func final() (*trace.Camera, *trace.BVH) {
 		ss2 = append(ss2, trace.NewSphere(geom.Vec{165 * rand.Float64(), 165 * rand.Float64(), 165 * rand.Float64()}, 10, white))
 	}
 	ss = append(ss, trace.NewTranslate(trace.NewRotateY(trace.NewBVH(0, 1, ss2...), 15), geom.Vec{-100, 270, 395}))
+
 	from := geom.Vec{478, 278, -600}
 	at := geom.Vec{278, 278, 0}
 	focus := 10.0

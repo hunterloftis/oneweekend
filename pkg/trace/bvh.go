@@ -27,11 +27,9 @@ type BVH struct {
 
 // NewBVH builds a new BVH containing surfaces in ss between times time0 and time1.
 func NewBVH(time0, time1 float64, ss ...Surface) *BVH {
-	return newBVHNode(0, time0, time1, ss...)
-}
-
-func newBVHNode(depth int, time0, time1 float64, ss ...Surface) *BVH {
-	b := BVH{}
+	if len(ss) < 4 {
+		return newLeaf(time0, time1, ss)
+	}
 
 	cheapest := float64(len(ss)) * costIntersect
 	var left, right []Surface
@@ -44,17 +42,24 @@ func newBVHNode(depth int, time0, time1 float64, ss ...Surface) *BVH {
 			}
 		}
 	}
-	if left == nil || right == nil || len(ss) < 4 {
-		for _, s := range ss {
-			b.leaves = append(b.leaves, leaf{surface: s, bounds: s.Bounds(time0, time1)})
-		}
-		b.bounds = boundsAround(time0, time1, ss)
-		return &b
+	if left == nil || right == nil {
+		return newLeaf(time0, time1, ss)
 	}
 
-	b.left = newBVHNode(depth+1, time0, time1, left...)
-	b.right = newBVHNode(depth+1, time0, time1, right...)
+	b := BVH{
+		left:  NewBVH(time0, time1, left...),
+		right: NewBVH(time0, time1, right...),
+	}
 	b.bounds = b.left.Bounds(time0, time1).Plus(b.right.Bounds(time0, time1))
+	return &b
+}
+
+func newLeaf(t0, t1 float64, ss []Surface) *BVH {
+	b := BVH{}
+	for _, s := range ss {
+		b.leaves = append(b.leaves, leaf{surface: s, bounds: s.Bounds(t0, t1)})
+	}
+	b.bounds = boundsAround(t0, t1, ss)
 	return &b
 }
 
