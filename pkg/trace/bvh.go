@@ -11,12 +11,17 @@ import (
 const costTraverse = 1
 const costIntersect = 2
 
+type leaf struct {
+	bounds  *AABB
+	surface Surface
+}
+
 // BVH is a surface that contains other surfaces
 // and organizes them into a bounding volume hierarchy.
 // This improves performance of the Hit() function over simple lists for most sets of surfaces.
 type BVH struct {
 	left, right *BVH
-	leaf        Surface
+	leaves      []leaf
 	bounds      *AABB
 }
 
@@ -27,11 +32,6 @@ func NewBVH(time0, time1 float64, ss ...Surface) *BVH {
 
 func newBVHNode(depth int, time0, time1 float64, ss ...Surface) *BVH {
 	b := BVH{}
-	if len(ss) < 4 {
-		b.leaf = NewList(ss...)
-		b.bounds = b.leaf.Bounds(time0, time1)
-		return &b
-	}
 
 	cheapest := float64(len(ss)) * costIntersect
 	var left, right []Surface
@@ -44,9 +44,11 @@ func newBVHNode(depth int, time0, time1 float64, ss ...Surface) *BVH {
 			}
 		}
 	}
-	if left == nil {
-		b.leaf = NewList(ss...)
-		b.bounds = b.leaf.Bounds(time0, time1)
+	if left == nil || right == nil || len(ss) < 4 {
+		for _, s := range ss {
+			b.leaves = append(b.leaves, leaf{surface: s, bounds: s.Bounds(time0, time1)})
+		}
+		b.bounds = boundsAround(time0, time1, ss)
 		return &b
 	}
 
@@ -62,8 +64,18 @@ func (b *BVH) Hit(r Ray, dMin, dMax float64, rnd *rand.Rand) *Hit {
 	if !b.bounds.Hit(r, dMin, dMax) {
 		return nil
 	}
-	if b.leaf != nil {
-		return b.leaf.Hit(r, dMin, dMax, rnd)
+	if len(b.leaves) > 0 {
+		var nearest *Hit
+		for _, l := range b.leaves {
+			if !l.bounds.Hit(r, dMin, dMax) {
+				continue
+			}
+			if hit := l.surface.Hit(r, dMin, dMax, rnd); hit != nil {
+				dMax = hit.Dist
+				nearest = hit
+			}
+		}
+		return nearest
 	}
 	lHit := b.left.Hit(r, dMin, dMax, rnd)
 	rHit := b.right.Hit(r, dMin, dMax, rnd)
@@ -101,6 +113,9 @@ func split(t0, t1 float64, axis int, fraction float64, ss []Surface) (ll, rr []S
 }
 
 func cost(t0, t1 float64, ll, rr []Surface) float64 {
+	if len(ll) == 0 || len(rr) == 0 {
+		return math.MaxFloat64
+	}
 	sa := boundsAround(t0, t1, append(ll, rr...)).SurfaceArea()
 	saL := boundsAround(t0, t1, ll).SurfaceArea()
 	saR := boundsAround(t0, t1, rr).SurfaceArea()
